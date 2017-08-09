@@ -1,8 +1,17 @@
-sliderDot1 <- -1
-sliderDot2 <- -1
-sliderDotNum <- 0
+#sliderFiles <<- ""
 
-sliderFiles <<- ""
+clearSliderDot <- function() {
+	assign("sliderDot1", -1, envir = .GlobalEnv)
+	assign("sliderDot2", -1, envir = .GlobalEnv)
+	assign("sliderDotNum", 0, envir = .GlobalEnv)
+}
+
+sliderInit <- function() {
+	clearSliderDot()
+	#sliderFiles <<- ""
+	assign("sliderData", list(), envir = .GlobalEnv)
+	assign("sliderCurrImgId", 1, envir = .GlobalEnv)
+}
 
 sliderMainMenu <- function(wnd) {
     topMenu <- tkmenu(wnd)
@@ -18,6 +27,7 @@ sliderMainMenu <- function(wnd) {
 	fileName <- paste(getwd(), "/sliderTpsFiles.txt", sep = "")	
 	if(file.exists(fileName)) {
 		sliderFiles <<- scan(file = fileName, what = "char", sep = "\n", quiet = TRUE)
+		#assign("sliderFiles", sliderFiles, envir = .GlobalEnv)
 		for(i in 1:length(sliderFiles)) {
 			tkadd(importMenu, "command", label = sliderFiles[i],command = function() importFile(i))	
 		}
@@ -56,11 +66,10 @@ sliderGetLineIndex <- function(x, y) {
 }
 
 sliderDotCancel <- function(K) {
+	tab <- get("tab", envir = .GlobalEnv)
 	if((tab == 1) && (K == "Escape")) {
 		showDots(currImgId)
-		sliderDot1 <<- -1
-		sliderDot2 <<- -1
-		sliderDotNum <<- 0
+		clearSliderDot()
 	}	
 }
 
@@ -74,15 +83,17 @@ sliderOnDotSelect <-function(x, y) {
 		tpsDataList <- get("activeDataList", envir = .GlobalEnv)
 		coords <- tpsDataList[[currImgId]][[3]] 
 		dotStatus <- tpsDataList[[currImgId]][[5]]
+		sliderDot1 <- get("sliderDot1", envir = .GlobalEnv)
+		sliderDotNum <- get("sliderDotNum", envir = .GlobalEnv)
 		
 		x <- coords[[dotId]][1] 
 		y <- coords[[dotId]][2] 
  
-		if(sliderDotNum == 0) {
-			sliderDot1 <<- dotId
+		if(sliderDotNum == 0) {			
+			assign("sliderDot1", dotId, envir = .GlobalEnv)
 			#change the color of the dot to "pink"
-			changeCurrDotColor(x, y, "black", "pink")	
-			sliderDotNum <<- sliderDotNum+1			
+			changeCurrDotColor(x, y, "black", "pink")			
+			assign("sliderDotNum", sliderDotNum+1, envir = .GlobalEnv)			
 		} else if(sliderDotNum == 1) {
 			if(dotId == sliderDot1) {
 				alertBox("Duplicate dot, invalid")
@@ -94,12 +105,12 @@ sliderOnDotSelect <-function(x, y) {
 				return ()
 			} 
 		
-			sliderDot2 <<- dotId	
+			assign("sliderDot2", dotId, envir = .GlobalEnv)			
 			#change the color of the dot to "pink"	
-			changeCurrDotColor(x, y, "black", "pink")	
-			sliderDotNum <<- sliderDotNum+1				
+			changeCurrDotColor(x, y, "black", "pink")		
+			assign("sliderDotNum", sliderDotNum+1, envir = .GlobalEnv)			
 		} else if(sliderDotNum == 2) {
-	
+			sliderDot2 <- get("sliderDot2", envir = .GlobalEnv)
 			if((dotId == sliderDot1)||(dotId == sliderDot2)) {
 				alertBox("duplicate dot, invalid")
 				return ()
@@ -141,9 +152,7 @@ sliderOnDotSelect <-function(x, y) {
 		
 			showDots(currImgId)
 			#clear sliderDot
-			sliderDot1 <<- -1
-			sliderDot2 <<- -1
-			sliderDotNum <<- 0				
+			clearSliderDot()
 		}		
 	}
 }

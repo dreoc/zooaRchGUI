@@ -234,11 +234,9 @@ zooaRch_GUI<-function() {
 setWorkDir<-function() {
     frame_files <- lapply(sys.frames(), function(x) x$ofile)
     frame_files <- Filter(Negate(is.null), frame_files)
-    #EOC added 8.4.2017 to avoid error ##########################################
     if (length(frame_files)>0){
       dir <- dirname(frame_files[[length(frame_files)]])
     } else {dir <- getwd()}
-    ####################################################################################
     setwd(dir)
 }
 

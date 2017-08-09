@@ -33,8 +33,12 @@ columnConfig<-function(labelFrame) {
 updateDataFrame <- function(e, dataName, x = "dataFrame") {
     name <- tclvalue(dataName)
     if (name == "Load User File"){
-        dataFrame <- getcsvfile()        
-    } else if (dataName == "Load Shape File"){
+        dataFrame <- getcsvfile()
+    }
+    ####################################################################################
+    # 8.7.2017 - EOC changed to fix errors reading surface and curve files in GMM menu #
+    #########################--BEGIN--##################################################
+    if (name == "Load Shape File"){
         getshapefile <- function() {
             name <- tclvalue(tkgetOpenFile(filetypes = "{{ESRI Shapefiles} {.shp}}"))
             if (name == "") return(data.frame());
@@ -43,15 +47,22 @@ updateDataFrame <- function(e, dataName, x = "dataFrame") {
             return(dataFrame)
         }
         dataFrame <- getshapefile()
+    }
+
+    if (name == "None" | name == "Choose Data"){
+      dataFrame <- NULL
+      assign("curve", dataFrame, envir = e)
+      ##########################--END--#################################################
+
     } else {
-        dataFrame <- get(name, .GlobalEnv)	
+        dataFrame <- get(name, .GlobalEnv)
     }
     assign(x, dataFrame, envir = e)
 }
 
 resetValues <- function(e){
     updateDataFrame(e, e$dataName)
-    
+
     e$inputs = sort(colnames(e$dataFrame))
     for (i in 1:length(e$varListbox)) {
         tkdelete(e$varListbox[[i]], 0, "end")
@@ -68,22 +79,22 @@ getVarName <- function(e, id) {
 }
 
 comboxLayout <- function(e, comboNum, dir) {
-    e$dataName <- tclVar("Choose one"); 
-    e$dataFrame <- tclVar("NULL"); 
+    e$dataName <- tclVar("Choose one");
+    e$dataFrame <- tclVar("NULL");
 
     columnConfig(e$layout)
 
     #Data Combobox
     e$dataLabel<-ttklabel(e$layout, text = "Data:")
     tkgrid(e$dataLabel, row = 0, column = 0, sticky = "e")
-    dataCombo <- ttkcombobox(e$layout, state = "readonly", 
-                               values = dfs.fun(), 
+    dataCombo <- ttkcombobox(e$layout, state = "readonly",
+                               values = dfs.fun(),
                                textvariable = e$dataName)
     tkgrid(dataCombo, row = 0, column = 1, sticky="ew", padx = 2)
     tkfocus(dataCombo)
-    
+
     if (comboNum < 2) {
-        tkbind(dataCombo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName))    
+        tkbind(dataCombo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName))
         return()
     }
     tkbind(dataCombo, "<<ComboboxSelected>>", function() resetValues(e))
@@ -92,7 +103,7 @@ comboxLayout <- function(e, comboNum, dir) {
         varLabel<-ttklabel(e$layout, text = "Variable:")
 
         varListbox <- smartListbox(e$layout, sort(colnames(e$dataFrame)))
-        tkfocus(varListbox) 
+        tkfocus(varListbox)
         tkbind(varListbox, "<Return>", function(W) tcl(W, "invoke"))
 
         if (dir == "ver") {
@@ -105,12 +116,12 @@ comboxLayout <- function(e, comboNum, dir) {
                 # special template for "Factorial ANOVA" and "Generalized Linear Model"
                 e$interaction<-tclVar("NULL")
                 put_label(e$layout, "Interaction:",row=1,column = col,sticky="n")
-                interCombo <- ttkcombobox(e$layout, state = "readonly", 
+                interCombo <- ttkcombobox(e$layout, state = "readonly",
                                           values = c("NULL"," +"," *"),
-                                          textvariable = e$interaction, 
+                                          textvariable = e$interaction,
                                           width=5)
                 tkgrid(interCombo, row = 2, column = col, sticky="ew", padx = 2)
-                tkfocus(interCombo) 
+                tkfocus(interCombo)
                 col <- (i + 1)
             }
 
@@ -128,7 +139,7 @@ createConfigureFrame<- function(e, comboNum=1, dir) {
     e$cancelLabel <- "cancel"
 
     e$wnd <- tktoplevel()
-    #tkwm.geometry(e$wnd, "300x300+300+300") 
+    #tkwm.geometry(e$wnd, "300x300+300+300")
     frame <- ttkframe(e$wnd, padding = c(3,3,12,12))
     tkpack(frame, expand = TRUE, fill = "both")
     e$layout <- ttklabelframe(frame, padding = 10)
@@ -144,7 +155,7 @@ createConfigureFrame<- function(e, comboNum=1, dir) {
     cancel_button <- ttkbutton(button_frame, text = e$cancelLabel, command=function() tkdestroy(e$wnd))
     ok_button <- ttkbutton(button_frame, text = e$okLabel, command=function() run(e))
     tkpack(button_frame, fill = "x", padx = 5, pady = 5)
-    tkpack(ttklabel(button_frame, text = " "), expand = TRUE, fill = "y", side = "left")              
+    tkpack(ttklabel(button_frame, text = " "), expand = TRUE, fill = "y", side = "left")
     sapply(list(cancel_button, ok_button), tkpack, side = "left", padx = 6)
     tkbind("TButton", "<Return>", function(W) tcl(W, "invoke"))
     tkfocus(e$wnd)

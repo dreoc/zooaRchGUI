@@ -67,29 +67,36 @@ layout.gpagen<-function(e){
     columnConfig(e$layout)
     #Data Combobox
     put_label(e$layout, "Input Data:",0,0,sticky="w")
-    data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                              values = array.fun(), 
+    data_combo <- ttkcombobox(e$layout, state = "readonly",
+                              values = array.fun(),
                               textvariable = e$dataName)
     tkgrid(data_combo, row = 0, column = 1, sticky="w", padx = 2)
-    tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName, "array"))    
+    tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName, "array"))
     tkfocus(data_combo)
 
     #Curve Combobox
     put_label(e$layout, "Input Curve:",2,0,sticky="w")
-    data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                              values = matrix.fun(), 
+    data_combo <- ttkcombobox(e$layout, state = "readonly",
+                              values = c(matrix.fun(),dfs.fun()),
                               textvariable = e$dataName2)
     tkgrid(data_combo, row = 2, column = 1, sticky="w", padx = 2)
-    tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName2, "curve"))    
+    if(tclvalue(e$dataName2) == "Choose Data" | tclvalue(e$dataName2) == "None" ){
+      e$curve<-NULL
+    }
+
+    tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName2, "curve"))
     tkfocus(data_combo)
 
     #Surface Combobox
     put_label(e$layout, "Input Surface:",3,0,sticky="w")
-    data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                              values = matrix.fun(), 
+    data_combo <- ttkcombobox(e$layout, state = "readonly",
+                              values = c(matrix.fun(),dfs.fun()),
                               textvariable = e$dataName3)
     tkgrid(data_combo, row = 3, column = 1, sticky="w", padx = 2)
-    tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName3, "surface"))    
+    if(tclvalue(e$surface) == "Choose Data" | tclvalue(e$surface) == "None" ){
+      e$surface<-NULL
+    }
+    tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName3, "surface"))
     tkfocus(data_combo)
 
     #Bending or ProcD Radiobuttons
@@ -109,13 +116,53 @@ layout.gpagen<-function(e){
 
 #Ok Function
 run.gpagen<-function(e) {
+  #######################################################################
+  # 8.7.2017 - EOC added to fix errors reading surface and curve files - BEGIN
+
+  if (class(e$type)=="tclVar"){
     if(tclvalue(e$type) == "ProcD"){
-        e$type<-TRUE
+      e$type<-TRUE
+    } else{
+      e$type<-FALSE
     }
-    else{
-        e$type<-FALSE
+  }
+
+  if (class(e$curve)=="tclVar"){
+    if(is.null(tclvalue(e$curve))){
+      e$curve<-NULL
     }
-    Y.gpa <- gpagen(e$array, curves = e$curve, surfaces = e$surface, ProcD = e$type, print.progress = tclvalue(e$progress))
+  }
+
+  if (class(e$curve)!="tclVar"){
+    if(is.null(e$curve)){
+      e$curve<-NULL
+    }
+  }
+
+  if (class(e$surface)=="tclVar"){
+    if(is.null(tclvalue(e$surface))){
+      e$surface<-NULL
+    } else if(tclvalue(e$surface)=="NULL"){
+      e$surface<-NULL
+    }
+  }
+
+  if (class(e$surface)!="tclVar"){
+    if(is.null(e$surface)){
+      e$surface<-NULL
+    }
+  }
+
+
+  if(is.matrix(e$curve)==FALSE & is.null(e$curve)==FALSE){
+    e$curve<-as.matrix(e$curve)
+  }
+
+  if(is.matrix(e$surface)==FALSE & is.null(e$surface)==FALSE){
+    e$surface<-as.matrix(e$surface)
+  }
+  ############################-END-###########################################
+    Y.gpa <- gpagen(e$array, curves = e$curve, surfaces = e$surface, ProcD = e$type, print.progress = as.numeric(tclvalue(e$progress)))
     summary(Y.gpa)
     plot(Y.gpa)
     pos<-1
@@ -125,24 +172,23 @@ run.gpagen<-function(e) {
 }
 
 digitize2D <-function() {
-	print("mainWnd")
     wnd <- tktoplevel(width=800, height=600)
-    tktitle(wnd) <- "2D Digitizing" 
-    
+    tktitle(wnd) <- "2D Digitizing"
+
 	dotMainMenu(wnd)
-    linkMainMenu(wnd)
+  linkMainMenu(wnd)
 	sliderMainMenu(wnd)
-	
+
 	mainFrame(wnd)
-	
+
 	#setwd("d:\\userdata\\slider_link")
 	#initialize data
-	assign("sliderData", list(), envir = .GlobalEnv)
-	assign("linkData", list(), envir = .GlobalEnv)
+	sliderInit()
+	linkInit()
+	digitizeInit()
 	assign("activeDataList", list(), envir = .GlobalEnv)
-	assign("sliderCurrImgId", 1, envir = .GlobalEnv)
-	assign("linkCurrImgId", 1, envir = .GlobalEnv)
 	assign("currImgId", 1, envir = .GlobalEnv)
 	assign("wnd", wnd, envir = .GlobalEnv)
+	assign("tab", 0, envir = .GlobalEnv)
 }
 

@@ -1,16 +1,8 @@
-#require(tcltk)
-#require(parallel)
-#require(geomorph)
-
-fitCanvasH <- 600
-fitCanvasW <- 800
-
-tab <- 0 # 0:link; 1:slider
 
 isDebug <- 0
 ################# main data structure ##############################
 #tpsDataList
-#tpsDataList[imgId][[1]]: speciman image dir
+#tpsDataList[imgId][[1]]: specimen image dir
 #tpsDataList[imgId][[2]]: scale factor
 #tpsDataList[imgId][[3]]: landmarks
 #tpsDataList[imgId][[4]]: sclae units
@@ -27,6 +19,7 @@ switchTab <- function(W, x, y) {
 	#record activeDataList and current image id
 	activeDataList <- get("activeDataList", envir = .GlobalEnv)
 	currImgId <- get("currImgId", envir = .GlobalEnv)
+	tab <- get("tab", envir = .GlobalEnv)
 	if(tab == 0) {
 		assign("digData", activeDataList, envir = .GlobalEnv)
 		assign("dotCurrImgId", currImgId, envir = .GlobalEnv)
@@ -40,19 +33,19 @@ switchTab <- function(W, x, y) {
 
 	#update canvas and activeDataList
 	if (tclvalue(id) == 0) {
-		tab <<- 0
+		assign("tab", 0, envir = .GlobalEnv)
 		menuTree <- get("dotMenuTree", envir = .GlobalEnv)
 		canvas <- get("digCanvas", envir = .GlobalEnv)
 		dataList <- get("digData", envir = .GlobalEnv)
 		currImgId <- get("dotCurrImgId", envir = .GlobalEnv)
 	} else if (tclvalue(id) == 1) {
-		tab <<- 1
+		assign("tab", 1, envir = .GlobalEnv)
 		canvas <- get("linkCanvas", envir = .GlobalEnv)
 		dataList <- get("linkData", envir = .GlobalEnv)
 		currImgId <- get("linkCurrImgId", envir = .GlobalEnv)
 		menuTree <- get("linkMenuTree", envir = .GlobalEnv)
 	}else if (tclvalue(id) == 2) {
-		tab <<- 2
+		assign("tab", 2, envir = .GlobalEnv)
 		canvas <- get("sliderCanvas", envir = .GlobalEnv)
 		dataList <- get("sliderData", envir = .GlobalEnv)
 		currImgId <- get("sliderCurrImgId", envir = .GlobalEnv)
@@ -66,8 +59,6 @@ switchTab <- function(W, x, y) {
 	assign("activeCanvas", canvas, envir = .GlobalEnv)
 	assign("activeDataList", dataList, envir = .GlobalEnv)
 	assign("currImgId", currImgId, envir = .GlobalEnv)
-
-	#updateImportMenu()
 }
 
 mainFrame <-function(wnd) {
@@ -175,6 +166,7 @@ getLineNum <- function(lineStatus) {
 }
 
 itemRemove <-function(x, y) {
+	tab <- get("tab", envir = .GlobalEnv)
 	if(tab == 1) {
 		popUpRemoveWindow(x, y, 'Do you want to delete this line?', "linkLine")
 	}else if(tab ==2) {
@@ -216,6 +208,8 @@ showLines <- function(imgId) {
 	canvas <- get("activeCanvas", envir = .GlobalEnv)
 	tkdelete(canvas, "line")
 	nlines <- 0
+	tab <- get("tab", envir = .GlobalEnv)
+
     if(length(lineList)) {
         for(i in 1:length(status)){
             if(status[[i]] == "removed") {next}
@@ -231,7 +225,7 @@ showLines <- function(imgId) {
 
 			item <- tkcreate(activeCanvas, "line", x1, y1, x2, y2, width=2, fill="green")
 			tkaddtag(activeCanvas, "line", "withtag", item)
-			print(paste(imgId,"showLines: draw line", item, dot1, dot2))
+			#print(paste(imgId,"showLines: draw line", item, dot1, dot2))
 			if(tab == 1) {
 				tpsDataList[[imgId]][[8]][[i]] <- c(dot1, dot2, item)
 			} else if(tab == 2) {
@@ -299,7 +293,7 @@ showDots <- function(imgId) {
 }
 
 getRatio <- function(imgFile) {
-	myPrint("getRatio")
+	#print("getRatio")
 	ratio <- 0
 	if(file.exists(imgFile)) {
 		img <- tclVar()
@@ -309,29 +303,30 @@ getRatio <- function(imgFile) {
 
 		if(height/600 > 1) {
 			ratio <- as.integer(height/600)
-			fitCanvasH <<- height/ratio
-			fitCanvasW <<- width/ratio
+			fitCanvasH <- height/ratio
+			fitCanvasW <- width/ratio
 		}else {
 			ratio <- as.integer(600/height)
 			#zoom
-			fitCanvasH <<- height*ratio
-			fitCanvasW <<- width*ratio
+			fitCanvasH <- height*ratio
+			fitCanvasW <- width*ratio
 			ratio <- 1/ratio
 		}
-		myPrint(paste(imgFile, "height:", height, "width:", width, "ratio:", ratio, "fitCanvasH:", fitCanvasH, "fitCanvasW:", fitCanvasW))
+		#print(paste(imgFile, "height:", height, "width:", width, "ratio:", ratio, "fitCanvasH:", fitCanvasH, "fitCanvasW:", fitCanvasW))
 	} else {
 		print(paste("File does not exists:", imgFile))
 		print("Ignore it!!")
+		return (c(0, 0, 0))
 	}
 
-	return (ratio)
+	return (c(ratio, fitCanvasW, fitCanvasH))
 }
 
 showPicture <- function() {
 	#myPrint("enter showPicture")
 	#clear canvas
-    canvas <- get("activeCanvas", envir = .GlobalEnv)
-    tkdelete(canvas, "all")
+  canvas <- get("activeCanvas", envir = .GlobalEnv)
+  tkdelete(canvas, "all")
 
 	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
 	id <- get("currImgId", envir = .GlobalEnv)
@@ -343,6 +338,7 @@ showPicture <- function() {
 	showLines(id)
 	showDots(id)
 
+	tab <- get("tab", envir = .GlobalEnv)
 	if(tab != 0) {
 		updateCtrlFrame()
 	}
@@ -351,7 +347,7 @@ showPicture <- function() {
 updateCtrlFrame <- function() {
 
 	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-
+	tab <- get("tab", envir = .GlobalEnv)
 	if(tab == 1) {
 		lineNumLabel <- get("linkLineNumLabel", envir = .GlobalEnv)
 		lineText <- "n links ="
@@ -374,6 +370,7 @@ updateCtrlFrame <- function() {
 }
 
 onNext <- function() {
+	tab <- get("tab", envir = .GlobalEnv)
     tpsDataList <- get("activeDataList", envir = .GlobalEnv)
 	nSpecimens <- length(tpsDataList)
 	if(nSpecimens > 0) {
@@ -397,6 +394,7 @@ onNext <- function() {
 onPrevious <- function() {
     tpsDataList <- get("activeDataList", envir = .GlobalEnv)
 	if(length(tpsDataList) > 0) {
+		tab <- get("tab", envir = .GlobalEnv)
 		if(tab == 0) {
 			digOnPrevious()
 		}else {
@@ -434,6 +432,7 @@ saveToCsv <- function() {
 	lineNum <- getLineNum(lineStatus)
 
 	ncolumn <- 2
+	tab <- get("tab", envir = .GlobalEnv)
 	if(tab == 2) {
 		write("before,slide,after",filename,append = TRUE)
 		ncolumn <- 3
@@ -479,13 +478,18 @@ importTpsFile <- function(tpsfile) {
 
 	specId <- 1
 	for(i in 1:nSpecimens){
-		ratio <- getRatio(filelist[[i]])
+		ratioV <- getRatio(filelist[[i]])
+
+		ratio <- ratioV[1]
+		canvasW <- ratioV[2]
+		canvasH <- ratioV[3]
+		#print(paste("ratio", ratio, "canvas h", canvasH, "canvas w", canvasW))
 		if(ratio == 0) {
 			nSpecimens <- nSpecimens-1
 			next
 		}
 
-		tpsDataList[[specId]] <- list(filelist[[i]], inscale[i], list(), "inches", list(), ratio, c(fitCanvasW, fitCanvasH), list(), list())
+		tpsDataList[[specId]] <- list(filelist[[i]], inscale[i], list(), "inches", list(), ratio, c(canvasW, canvasH), list(), list())
 
 		coords <- olddat[, , i]
 		temp <- list()
@@ -493,7 +497,7 @@ importTpsFile <- function(tpsfile) {
 
 		for (j in 1:nlandmarks){
 			if(!is.na(coords[j, 1])) {
-				temp[[j]] <- c(as.numeric(coords[j, 1])/ratio, fitCanvasH-as.numeric(coords[j, 2])/ratio)
+				temp[[j]] <- c(as.numeric(coords[j, 1])/ratio, canvasH-as.numeric(coords[j, 2])/ratio)
 				statusList[[j]] <- "normal"
 
 			}else {
@@ -507,30 +511,32 @@ importTpsFile <- function(tpsfile) {
 		specId <- specId+1
 	}
 
-	if(tab == 0) {
-		assign("digData", tpsDataList, envir = .GlobalEnv)
-		assign("digCurrImgId", 1, envir = .GlobalEnv)
-	}else if (tab == 1) {
-		assign("linkData", tpsDataList, envir = .GlobalEnv)
-		assign("linkCurrImgId", 1, envir = .GlobalEnv)
-	}else if(tab == 2) {
-		assign("sliderData", tpsDataList, envir = .GlobalEnv)
-		assign("sliderCurrImgId", 1, envir = .GlobalEnv)
-	}
+	if(nSpecimens > 0) {
+		assign("activeDataList", tpsDataList, envir = .GlobalEnv)
+		assign("currImgId", 1, envir = .GlobalEnv)
+		assign("landmarkNum", nlandmarks, envir = .GlobalEnv)
 
-	assign("activeDataList", tpsDataList, envir = .GlobalEnv)
-	assign("currImgId", 1, envir = .GlobalEnv)
-	assign("landmarkNum", nlandmarks, envir = .GlobalEnv)
-
-	if(tab == 0) {
-		digUpdateSpecNumber(nSpecimens)
-		digShowPicture()
-	} else {
-		showPicture()
+		tab <- get("tab", envir = .GlobalEnv)
+		if(tab == 0) {
+			digitizeInit()
+			assign("digData", tpsDataList, envir = .GlobalEnv)
+			assign("digCurrImgId", 1, envir = .GlobalEnv)
+			digUpdateSpecNumber(nSpecimens)
+			digShowPicture()
+		}else if (tab == 1) {
+			linkInit()
+			assign("linkData", tpsDataList, envir = .GlobalEnv)
+			showPicture()
+		}else if(tab == 2) {
+			sliderInit()
+			assign("sliderData", tpsDataList, envir = .GlobalEnv)
+			showPicture()
+		}
 	}
 }
 
 importFile <- function(id) {
+	tab <- get("tab", envir = .GlobalEnv)
 	if(tab == 1) {
 		tpsfile <- linkFiles[id]
 	} else if(tab == 2) {
@@ -544,7 +550,7 @@ openTpsFile <- function() {
 
     if (tpsfileName != "") {
 		importTpsFile(tpsfileName)
-
+		tab <- get("tab", envir = .GlobalEnv)
 		#record user opened tps file recently
 		if(tab != 0) {
 			importFileList <- ""

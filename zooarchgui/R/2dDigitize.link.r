@@ -1,5 +1,11 @@
-linkFiles <<- ""
-startDot <- -1
+#linkFiles <<- ""
+#startDot <- -1
+
+linkInit <- function(wnd) {
+	assign("linkData", list(), envir = .GlobalEnv)
+	assign("linkCurrImgId", 1, envir = .GlobalEnv)
+	assign("startDot", -1, envir = .GlobalEnv)
+}
 
 linkMainMenu <- function(wnd) {
 #print("linkMainMenu")
@@ -63,7 +69,8 @@ linkLineStart <- function(x, y) {
 	
 	dotId <- getDotId(x, y)
 	if(dotId != 0) {	
-		startDot <<- dotId		
+		#startDot <<- dotId	
+		assign("startDot", dotId, envir = .GlobalEnv)		
 		
 		canvas <- get("activeCanvas", envir = .GlobalEnv)
 		tkdtag(canvas, "selected")
@@ -77,6 +84,8 @@ linkLineEnd<-function(x, y) {
 	tkdelete(activeCanvas, "tmpline")
 		
 	dotId <- getDotId(x, y)
+	startDot <- get("startDot", envir = .GlobalEnv)
+	
 	if((dotId != 0) && (dotId != startDot)) {	
 		tpsDataList <- get("activeDataList", envir = .GlobalEnv)
 		currImgId <- get("currImgId", envir = .GlobalEnv)
@@ -109,13 +118,15 @@ linkLineEnd<-function(x, y) {
 		tkconfigure(lineNumLabel, text = paste("n links =", nlines))
 	
 		#clear variable
-		startDot <<- -1
+		assign("startDot", -1, envir = .GlobalEnv)
 	}
 }
 
 linkLineCont<-function(x, y) {
 	x <- as.numeric(x)
 	y <- as.numeric(y)
+	
+	startDot <- get("startDot", envir = .GlobalEnv)
 	
 	if(startDot != -1) {
 		activeCanvas <- get("activeCanvas", envir = .GlobalEnv)
