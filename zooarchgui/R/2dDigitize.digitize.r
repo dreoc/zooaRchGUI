@@ -530,7 +530,8 @@ openSpecimens <- function() {
 	#print("openSpecimens")
     #############################################################
     # 8.9.2017 EOC added "title" argument to tkgetOpenFile
-    fileStr <- tclvalue(tkgetOpenFile( filetypes = "{{image file} {.bmp .jpg .png .gif}}",
+    # only GIF files are serched for until other files can be read
+    fileStr <- tclvalue(tkgetOpenFile( filetypes = "{{GIF file} {.gif}}",
                                        multiple=TRUE, title="Select Images to Digitize"))
     ###########################################################
 
