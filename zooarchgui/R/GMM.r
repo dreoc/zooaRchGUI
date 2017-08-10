@@ -172,23 +172,27 @@ run.gpagen<-function(e) {
 }
 
 digitize2D <-function() {
-    wnd <- tktoplevel(width=800, height=600)
-    tktitle(wnd) <- "2D Digitizing"
+    e <- new.env()
+	
 
-	dotMainMenu(wnd)
-  linkMainMenu(wnd)
-	sliderMainMenu(wnd)
+	
+    e$wnd <- tktoplevel(width=800, height=600)
+    tktitle(e$wnd) <- "2D Digitizing"
 
-	mainFrame(wnd)
+	dotMainMenu(e)
+    linkMainMenu(e)
+	sliderMainMenu(e)
+
+	mainFrame(e)
 
 	#setwd("d:\\userdata\\slider_link")
 	#initialize data
-	sliderInit()
-	linkInit()
-	digitizeInit()
-	assign("activeDataList", list(), envir = .GlobalEnv)
-	assign("currImgId", 1, envir = .GlobalEnv)
-	assign("wnd", wnd, envir = .GlobalEnv)
-	assign("tab", 0, envir = .GlobalEnv)
+	sliderInit(e)
+	linkInit(e)
+	digitizeInit(e)
+	
+	e$activeDataList <- list()
+	e$currImgId <- 1
+	e$tab <- 0
 }
 

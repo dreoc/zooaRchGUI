@@ -1,144 +1,136 @@
 scaleUnitVal <- tclVar("inches")
 applyToAll <- tclVar("yes")
 
-clearScaleDot <- function() {
-	assign("scaleDot1", c(0, 0), envir = .GlobalEnv)
-	assign("scaleDot2", c(0, 0), envir = .GlobalEnv)
-	assign("scaleDotNum", 0, envir = .GlobalEnv)
-	assign("scaleMode", 0, envir = .GlobalEnv)
+clearScaleDot <- function(e) {
+	e$scaleDot1 <- c(0, 0)
+	e$scaleDot2 <- c(0, 0)
+	e$scaleDotNum <- 0
+	e$scaleMode <- 0
 }
 
-digitizeInit <- function() {
-	assign("font", 10, envir = .GlobalEnv)
-	assign("landmarkNum", 5, envir = .GlobalEnv)
-	assign("zoom", 0, envir = .GlobalEnv)
-	assign("digCurrImgId", 1, envir = .GlobalEnv)
-	assign("digData", list(), envir = .GlobalEnv)
-
-	clearScaleDot()
+digitizeInit <- function(e) {
+	e$font <- 10
+	e$landmarkNum <- 5
+	e$zoom <- 0
+	e$digCurrImgId <- 1
+	e$digData <- list()
+	
+	clearScaleDot(e)
 }
 
-dotMainMenu <- function(wnd) {
+dotMainMenu <- function(e) {
 #print("dotMainMenu")
-    topMenu <- tkmenu(wnd)
-    tkconfigure(wnd, menu = topMenu)
-
+    topMenu <- tkmenu(e$wnd)
+    tkconfigure(e$wnd, menu = topMenu) 
+	
     #File Menu
     fileMenu <- tkmenu(topMenu, tearoff = FALSE)  # TOP menu
-    tkadd(fileMenu, "command", label = "Create tps file",command = function() openSpecimens())
-    tkadd(fileMenu, "command", label = "Open tps file", command = function() openTpsFile())
-    tkadd(fileMenu, "command", label = "Save", command = function() savetoTpsFile())
-    tkadd(fileMenu, "command", label = "Exit", command = function() tkdestroy(wnd))
+    tkadd(fileMenu, "command", label = "Create tps file",command = function() openSpecimens(e))
+    tkadd(fileMenu, "command", label = "Open tps file", command = function() openTpsFile(e))
+    tkadd(fileMenu, "command", label = "Save", command = function() savetoTpsFile(e))
+    tkadd(fileMenu, "command", label = "Exit", command = function() tkdestroy(e$wnd))
     tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
-
-	assign("dotMenuTree", topMenu, envir = .GlobalEnv)
+	
+	e$dotMenuTree <- topMenu
 }
 
 #draw canvas and other widgets
-digCreateCtlFrame <- function(parent) {
+digCreateCtlFrame <- function(e, parent) {
 #print("digCreateCtlFrame")
 
 	digCtlFrame <- ttkframe(parent)
 
-	setScaleBtn <- ttkbutton(digCtlFrame, text = "Digitize scale", command = function() setScale())
-	setLandmarkNumBtn <- ttkbutton(digCtlFrame, text = "Set number of landmarks", command = function() setLandmarkNum())
+	setScaleBtn <- ttkbutton(digCtlFrame, text = "Digitize scale", command = function() setScale(e))
+	setLandmarkNumBtn <- ttkbutton(digCtlFrame, text = "Set number of landmarks", command = function() setLandmarkNum(e))
 
-    scaleLabel = tklabel(digCtlFrame, text='Scale Factor: not set')
-    assign("scaleLabel", scaleLabel, envir = .GlobalEnv)
+    e$scaleLabel = tklabel(digCtlFrame, text='Scale Factor: not set')
 
-    path <- ttklabel(digCtlFrame, text = "Path:")
-    assign("imgPath", path, envir = .GlobalEnv)
-    zoomBtn1 <- ttkbutton(digCtlFrame, text = "zoom +", command = function() onZoom("in"))
-    zoomBtn2 <- ttkbutton(digCtlFrame, text = "zoom -",command = function() onZoom("out"))
-    fitBtn <- ttkbutton(digCtlFrame, text = "Fit",command = function() onFit())
+    e$imgPath <- ttklabel(digCtlFrame, text = "Path:")
+    zoomBtn1 <- ttkbutton(digCtlFrame, text = "zoom +", command = function() onZoom(e, "in"))
+    zoomBtn2 <- ttkbutton(digCtlFrame, text = "zoom -",command = function() onZoom(e, "out"))
+    fitBtn <- ttkbutton(digCtlFrame, text = "Fit",command = function() onFit(e))
 
-    labelLandmarkVar <-tclVar("1")
-    assign("labelLandmark", labelLandmarkVar, envir = .GlobalEnv)
-    labelLandmark <- ttkcheckbutton(digCtlFrame, text = "Label Landmark",variable=labelLandmarkVar, command=onLabelLandMark)
+    e$labelLandmarkVar <-tclVar("1")
+    labelLandmark <- ttkcheckbutton(digCtlFrame, text = "Label Landmark",variable=e$labelLandmarkVar, command= function()onLabelLandMark(e))
 
-    fontAdd <- ttkbutton(digCtlFrame, text = "Label Size +", command = function() onFontAdd())
-    fontDec <- ttkbutton(digCtlFrame, text = "Label Size -",command = function() onFontDec())
+    fontAdd <- ttkbutton(digCtlFrame, text = "Label Size +", command = function() onFontAdd(e))
+    fontDec <- ttkbutton(digCtlFrame, text = "Label Size -",command = function() onFontDec(e))
 
-	specimenNumLabel <- ttklabel(digCtlFrame, text = "Number of Specimens: 0")
-    assign("specimenNumLabel", specimenNumLabel, envir = .GlobalEnv)
-
-	landMarkNumLabel <- ttklabel(digCtlFrame, text = "Number of Landmarks: 0")
-    assign("landMarkNumLabel", landMarkNumLabel, envir = .GlobalEnv)
-
-    missLandmarkVar <-tclVar("0")
-    assign("missLandmark", missLandmarkVar, envir = .GlobalEnv)
-    missLandmark <- ttkcheckbutton(digCtlFrame, text = "Missing Landmark",variable=missLandmarkVar)
-	assign("missLandmarkCheBtn", missLandmark, envir = .GlobalEnv)
-    sapply(list(setScaleBtn, setLandmarkNumBtn, scaleLabel, path, zoomBtn1, zoomBtn2, fitBtn, labelLandmark, fontAdd, fontDec, specimenNumLabel, landMarkNumLabel, missLandmark), tkpack)
+	e$specimenNumLabel <- ttklabel(digCtlFrame, text = "Number of Specimens: 0")
+	e$landMarkNumLabel <- ttklabel(digCtlFrame, text = "Number of Landmarks: 0")
+    
+    e$missLandmarkVar <-tclVar("0")
+    e$missLandmarkCheBtn <- ttkcheckbutton(digCtlFrame, text = "Missing Landmark",variable=e$missLandmarkVar)
+	
+    sapply(list(setScaleBtn, setLandmarkNumBtn, e$scaleLabel, e$imgPath, zoomBtn1, zoomBtn2, fitBtn, labelLandmark, fontAdd, fontDec, e$specimenNumLabel, e$landMarkNumLabel, e$missLandmarkCheBtn), tkpack)
 	return (digCtlFrame)
 }
 
-bindDigCanvasEvent <-function(canvas) {
-    tkbind(canvas, "<Double-Button-1>", dotAdd)
-    tkbind(canvas, "<B1-Motion>", dotMove)
-	tkbind(canvas, "<ButtonRelease-1>", dotRelease)
-    tkitembind(canvas, "point", "<1>", dotSelect)
-    tkitembind(canvas, "point", "<3>", dotRemove)
+bindDigCanvasEvent <-function(e, canvas) {   
+    tkbind(canvas, "<Double-Button-1>", function(x, y) {
+	dotAdd(e, x, y)})
+    tkbind(canvas, "<B1-Motion>", function(x, y) {
+	dotMove(e, x, y)})
+	tkbind(canvas, "<ButtonRelease-1>", function(x, y) {
+	dotRelease(e, x, y)})
+    tkitembind(canvas, "point", "<1>", function(x, y) {
+	dotSelect(e, x, y)})
+    tkitembind(canvas, "point", "<3>", function(x, y) {
+	dotRemove(e, x, y)})
 }
 
-digUpdateSpecNumber <-function(num) {
+digUpdateSpecNumber <-function(e, num) {
 	#print("digUpdateSpecNumber")
-	specimenNumLabel <- get("specimenNumLabel", envir = .GlobalEnv)
-	tkconfigure(specimenNumLabel, text = paste("Number of Specimens: ", num))
+	tkconfigure(e$specimenNumLabel, text = paste("Number of Specimens: ", num))
 }
 
-digShowPicture <- function() {
+digShowPicture <- function(e) {
 #print("digShowPicture")
-	onFit()
-
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	imgId <- get("currImgId", envir = .GlobalEnv)
+	onFit(e)
+	tpsDataList <- e$activeDataList
+	imgId <- e$currImgId
 	imgFile <- tpsDataList[[imgId]][[1]]
 
     #update image path
-    pathLabel <- get("imgPath", envir = .GlobalEnv)
+    pathLabel <- e$imgPath
     tkconfigure(pathLabel, text = paste("Path: ", imgFile))
 
 	#update scale factor
-	scaleLabel <- get("scaleLabel", envir = .GlobalEnv)
 	scaleFactor <- tpsDataList[[imgId]][[2]]
 	if(scaleFactor) {
-		tkconfigure(scaleLabel, text = paste("Scale Factor: ", format(scaleFactor, digits = 5)))
+		tkconfigure(e$scaleLabel, text = paste("Scale Factor: ", format(scaleFactor, digits = 5)))
 	} else {
-		tkconfigure(scaleLabel, text = paste("Scale Factor: ", "not set"))
+		tkconfigure(e$scaleLabel, text = paste("Scale Factor: ", "not set"))
 	}
 
 	#update number of landmarks
-	dotNum <- digGetDotNum()
-	landMarkNumLabel <- get("landMarkNumLabel", envir = .GlobalEnv)
-	tkconfigure(landMarkNumLabel, text = paste("Number of Landmarks: ", dotNum))
+	dotNum <- digGetDotNum(e)
+	tkconfigure(e$landMarkNumLabel, text = paste("Number of Landmarks: ", dotNum))
 }
 
-onZoom <- function(type) {
+onZoom <- function(e, type) {
 	#calculate current zoom level
-	zoom <- get("zoom", envir = .GlobalEnv)
 	if(type == "in") {
-		currZoom = as.integer(zoom)+1
+		currZoom = as.integer(e$zoom)+1
 	}
 	else if(type == "out") {
-		currZoom = as.integer(zoom)-1
+		currZoom = as.integer(e$zoom)-1
 	}
 
 	#build image according to zoom level
 	zoomImg <- tclVar()
     tcl('image', 'create', 'photo', zoomImg)
-	fitImage <- get("fitImage", envir = .GlobalEnv)
 	if(currZoom > 0) {
-		tcl(zoomImg, 'copy', fitImage, zoom=(1+currZoom)) #large
+		tcl(zoomImg, 'copy', e$fitImage, zoom=(1+currZoom)) #large
 	}else if(currZoom < 0){
-		tcl(zoomImg, 'copy', fitImage, subsample=(1+abs(currZoom)))
+		tcl(zoomImg, 'copy', e$fitImage, subsample=(1+abs(currZoom)))
 	} else {
-		zoomImg <- fitImage
+		zoomImg <- e$fitImage
 	}
 
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	imgId <- get("currImgId", envir = .GlobalEnv)
+	canvas <- e$activeCanvas
+	tpsDataList <- e$activeDataList
+	imgId <- e$currImgId
 	tkdelete(canvas, "all")
 	canvasH <- tpsDataList[[imgId]][[7]][2]
 	canvasW <- tpsDataList[[imgId]][[7]][1]
@@ -148,35 +140,33 @@ onZoom <- function(type) {
 
 	#show dots and lable when size is back to normal
 	if(currZoom == 0) {
-		showDots(imgId)
-		onLabelLandMark()
+		showDots(e)
+		onLabelLandMark(e)
 	}
 
-	assign("zoom", currZoom, envir = .GlobalEnv)
+	e$zoom <- currZoom
 }
 
-onFontAdd <- function() {
-    assign("font", font + 1, envir = .GlobalEnv)
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
-    tkdelete(canvas, "label")
-    onLabelLandMark()
+onFontAdd <- function(e) {
+    e$font <- e$font + 1
+    tkdelete(e$activeCanvas, "label")
+    onLabelLandMark(e)
 }
 
-onFontDec <- function() {
-    assign("font", font - 1, envir = .GlobalEnv)
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
-    tkdelete(canvas, "label")
-    onLabelLandMark()
+onFontDec <- function(e) {
+	e$font <- e$font - 1
+    tkdelete(e$activeCanvas, "label")
+    onLabelLandMark(e)
 }
 
-onFit <- function() {
+onFit <- function(e) {
 	#print("enter onFit")
-
-	id <- get("currImgId", envir = .GlobalEnv)
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
-
+	
+	id <- e$currImgId
+	canvas <- e$activeCanvas
+	
 	#show image
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+	tpsDataList <- e$activeDataList
 	imgFile <- tpsDataList[[id]][[1]]
 	zoomImg <- tclVar()
 	tcl('image', 'create', 'photo', zoomImg)
@@ -187,7 +177,7 @@ onFit <- function() {
 	ratio <- tpsDataList[[id]][[6]]
 	canvasH <- tpsDataList[[id]][[7]][2]
 	canvasW <- tpsDataList[[id]][[7]][1]
-
+	
 	height <- as.integer(tcl('image', 'height', img))
 
 	ratio <- as.integer(height/600)
@@ -203,88 +193,74 @@ onFit <- function() {
 	#assign("digData", tpsDataList, envir = .GlobalEnv)
 
 	#reset zoom level
-	assign("fitImage", zoomImg, envir = .GlobalEnv)
-	assign("zoom", 0, envir = .GlobalEnv)
-	assign("activeCanvas", canvas, envir = .GlobalEnv)
+	e$fitImage <- zoomImg
+	e$zoom <- 0
+	e$activeCanvas <- canvas
 
-	showDots(id)
-	onLabelLandMark()
+	showDots(e)
+	onLabelLandMark(e)
 }
 
-label<-function(id, x, y) {
+label<-function(e, id, x, y) {
 	#print("label")
-    canvas <- get("activeCanvas", envir = .GlobalEnv)
-    font <- get("font",  envir = .GlobalEnv)
-    l <- tkcreate(canvas, "text", x + 12, y, text=id, fill="red", font=c("Helvetica", font))
+    canvas <- e$activeCanvas
+    l <- tkcreate(canvas, "text", x + 12, y, text=id, fill="red", font=c("Helvetica", e$font))
     tkaddtag(canvas, "label", "withtag", l)
 }
 
-onLabelLandMark <- function() {
+onLabelLandMark <- function(e) {
 #print("onLabelLandMark")
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
-    tkdelete(canvas, "label")
+    tkdelete(e$activeCanvas, "label")
 
-    labelLandmarkVar <- get("labelLandmark", envir = .GlobalEnv)
-    if (tclvalue(labelLandmarkVar) == "1") {
-        tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-
+    if (tclvalue(e$labelLandmarkVar) == "1") {
+        tpsDataList <- e$activeDataList
 		if(length(tpsDataList) > 0) {
-			imgId <- get("currImgId", envir = .GlobalEnv)
+			imgId <- e$currImgId
 			temp <- tpsDataList[[imgId]][[3]]
 			statusList <- tpsDataList[[imgId]][[5]]
+
 			if(length(temp)) {
 				id <- 1
 				for(i in 1:length(statusList)){
 					#print(paste("i:", i, "status:", statusList[[i]]))
 					if(statusList[[i]] == "removed") {next}
-					label(id, temp[[i]][1], temp[[i]][2])
+					label(e, id, temp[[i]][1], temp[[i]][2])			
 					id <- id + 1
 				}
 			}
-		}
-    }
+		}        
+    } 
 }
 
 #show next specimen
-digOnNext <- function() {
-    currImgId <- get("currImgId", envir = .GlobalEnv)
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-
+digOnNext <- function(e) {
 	#check if it is the last picture
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
-	if(scaleMode) {
+	if(e$scaleMode) {
 		alertBox("Please finish scale calculation")
-	} else if(currImgId < length(tpsDataList)) {
+	} else if(e$currImgId < length(e$activeDataList)) {
 		#check if the landmark is enough
-		dotNum <- digGetDotNum()
-		landmarkNum <- get("landmarkNum", envir = .GlobalEnv)
-		if(dotNum >= as.integer(landmarkNum)) {
-			assign("currImgId", currImgId+1, envir = .GlobalEnv)
-			digShowPicture()
+		dotNum <- digGetDotNum(e)
+		if(dotNum >= as.integer(e$landmarkNum)) {
+			e$currImgId <- e$currImgId+1
+			digShowPicture(e)
 		} else {
 			alertBox("Incorrect number of landmarks")
 		}
-
     } else {
         alertBox("It's the last specimen")
     }
 }
 
 #show the previous specimen
-digOnPrevious <- function() {
-    currImgId <- get("currImgId", envir = .GlobalEnv)
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
-	if(scaleMode) {
+digOnPrevious <- function(e) {
+	if(e$scaleMode) {
 		alertBox("Please finish scale calculation")
-	} else if(currImgId > 1) {
+	} else if(e$currImgId > 1) {
 		#check if the landmark is enough
-		dotNum <- digGetDotNum()
-		landmarkNum <- get("landmarkNum", envir = .GlobalEnv)
-		if(dotNum >= as.integer(landmarkNum)) {
-			assign("currImgId", currImgId-1, envir = .GlobalEnv)
-			digShowPicture()
+		dotNum <- digGetDotNum(e)
+		if(dotNum >= as.integer(e$landmarkNum)) {
+			e$currImgId <- e$currImgId-1
+			digShowPicture(e)
 		} else {
 			alertBox("Incorrect number of landmarks")
 		}
@@ -294,10 +270,12 @@ digOnPrevious <- function() {
     }
 }
 
-getPicScale <- function(dot1,dot2, scale) {
+getPicScale <- function(e, scale) {
 	#get ratio
-	id <- get("currImgId", envir = .GlobalEnv)
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+	id <- e$currImgId
+	dot1 <- e$scaleDot1
+	dot2 <- e$scaleDot2
+    tpsDataList <- e$activeDataList
 	ratio <- tpsDataList[[id]][[6]]
 	fitImgH <- as.integer(tpsDataList[[id]][[7]])
 
@@ -311,32 +289,28 @@ getPicScale <- function(dot1,dot2, scale) {
 	return (scale/sqrt(sum((x2-x1)^2+(y2-y1)^2)))
 }
 
-onSetScaleOk <- function() {
-	if(scaleDotNum < 2) {
+onSetScaleOk <- function(e) {
+	if(e$scaleDotNum < 2) {
 		alertBox("Incorrect number of scale dots")
 		return (0)
 	}
 
 	#get distance
-	entry <- get("distanceEntry", envir = .GlobalEnv)
-    distance <- tclvalue(tkget(entry))
+    distance <- tclvalue(tkget(e$distanceEntry))
 
 	#calculate scale factor
-	scaleDot1 <- get("scaleDot1", envir = .GlobalEnv)
-	scaleDot2 <- get("scaleDot2", envir = .GlobalEnv)
-	scaleFactor <- getPicScale(scaleDot1, scaleDot2, distance)
+	scaleFactor <- getPicScale(e, distance)
 	#print(paste("scale factor:",scaleFactor))
-
+	
 	#show scale factor
-	scaleLabel <- get("scaleLabel", envir = .GlobalEnv)
-	tkconfigure(scaleLabel, text = paste("Scale Factor: ", format(scaleFactor, digits = 5)))
+	tkconfigure(e$scaleLabel, text = paste("Scale Factor: ", format(scaleFactor, digits = 5)))
 
 	#update tpsDataList
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	currImgId <- get("currImgId", envir = .GlobalEnv)
+	tpsDataList <- e$activeDataList
+	currImgId <- e$currImgId
 	if(tclvalue(applyToAll) == "yes") {
-		print(paste("apply to all", tclvalue(applyToAll)))
-		print(paste("scaleUnitVal", tclvalue(scaleUnitVal)))
+		#print(paste("apply to all", tclvalue(applyToAll)))
+		#print(paste("scaleUnitVal", tclvalue(scaleUnitVal)))
 		for(i in 1:length(tpsDataList)) {
 			tpsDataList[[i]][[2]] <- scaleFactor
 			tpsDataList[[i]][[4]] <- tclvalue(scaleUnitVal)
@@ -347,29 +321,25 @@ onSetScaleOk <- function() {
 	}
 
 	#clear variables
-	clearScaleDot()
-	assign("activeDataList", tpsDataList, envir = .GlobalEnv)
+	clearScaleDot(e)
+	e$activeDataList <- tpsDataList
 
-	win <- get("setScaleWin", envir = .GlobalEnv)
-	tkdestroy(win)
+	tkdestroy(e$setScaleWin)
 }
 
-onlandmarkNumOk <- function() {
+onlandmarkNumOk <- function(e) {
 	#get user input value
-	entry <- get("landmarkEntry", envir = .GlobalEnv)
-    landmarkNum <- tclvalue(tkget(entry))
-	assign("landmarkNum", landmarkNum, envir = .GlobalEnv)
+    e$landmarkNum <- tclvalue(tkget(e$landmarkEntry))
 
 	# turn to the first picture
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	assign("currImgId", 1, envir = .GlobalEnv)
-	digShowPicture()
-
-	win <- get("landmarkNumWin", envir = .GlobalEnv)
-	tkdestroy(win)
+	tpsDataList <- e$activeDataList
+	e$currImgId <- 1
+	digShowPicture(e)
+	
+	tkdestroy(e$landmarkNumWin)
 }
 
-createSetScaleWind <- function() {
+createSetScaleWind <- function(e) {
 	win <- tktoplevel()
 	tkwm.title(win, "Set Scale")
 
@@ -381,22 +351,21 @@ createSetScaleWind <- function() {
 	tkgrid.columnconfigure(label_frame, 1, weight = 1)
 
 	distancelabel = tklabel(label_frame, text='distance: ')
-	distanceEntry = tkentry(label_frame, textvariable=tclVar("10"))
+	e$distanceEntry = tkentry(label_frame, textvariable=tclVar("10"))
 	tkgrid(distancelabel, row = 0, column = 0, sticky = "e")
-	tkgrid(distanceEntry, row = 0, column = 1, sticky = "e")
-	assign("distanceEntry", distanceEntry, envir = .GlobalEnv)
+	tkgrid(e$distanceEntry, row = 0, column = 1, sticky = "e")
 
 	unitlabel = tklabel(label_frame, text='unit: ')
 	unitCombox <- ttkcombobox(label_frame, state = "readonly", values = c('inches', 'millimeters', 'centimeters'), textvariable = scaleUnitVal)
 	tkgrid(unitlabel, row = 1, column = 0, sticky = "e")
 	tkgrid(unitCombox, row = 1, column = 1, sticky = "e")
-	assign("unitCombox", unitCombox, envir = .GlobalEnv)
+	e$unitCombox <- unitCombox
 
 	applyLabel = tklabel(label_frame, text='apply to all specimens')
 	applyCombox <- ttkcombobox(label_frame, state = "readonly", values = c('yes', 'no'), textvariable = applyToAll)
 	tkgrid(applyLabel, row = 2, column = 0, sticky = "e")
 	tkgrid(applyCombox, row = 2, column = 1, sticky = "e")
-	assign("applyCombox", applyCombox, envir = .GlobalEnv)
+	e$applyCombox <- applyCombox
 
 	noteLable <- tklabel(win, text='Note: Please place two dots for scale setting')
 	tkpack(noteLable, expand = TRUE, fill = "both", padx = 5, pady = 5)
@@ -404,60 +373,58 @@ createSetScaleWind <- function() {
 	btnFrame <- ttkframe(win)
 	tkpack(btnFrame, fill = "x", padx = 5, pady = 5)
 	cancelBtn <- ttkbutton(btnFrame, text = "cancel", command = function() tkdestroy(win))
-	okBtn <- ttkbutton(btnFrame, text = "ok",command = function() onSetScaleOk())
+	okBtn <- ttkbutton(btnFrame, text = "ok",command = function() onSetScaleOk(e))
 
 	tkpack(ttklabel(btnFrame, text = " "), expand = TRUE, fill = "y", side = "left")
 	sapply(list(cancelBtn, okBtn), tkpack, side = "left", padx = 6)
 
-	assign("setScaleWin", win, envir = .GlobalEnv)
+	e$setScaleWin <- win
 	tkfocus(win)
 }
 
-setScale <- function() {
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
+setScale <- function(e) {
+	canvas <- e$activeCanvas
 	tkdelete(canvas, "scale")
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+	tpsDataList <- e$activeDataList
 
 	if(length(tpsDataList) == 0) {
 		alertBox("no picture open")
-	} else {
-		assign("scaleMode", 1, envir = .GlobalEnv)
-		createSetScaleWind()
+	} else {		
+		e$scaleMode <- 1
+		createSetScaleWind(e)		
 	}
 }
 
-setLandmarkNum <- function() {
+setLandmarkNum <- function(e) {
 	win <- tktoplevel()
 	tkwm.title(win, "Set Landmark Number")
 
 	entryFrame <- ttkframe(win)
 	tkpack(entryFrame, expand = TRUE, fill = "both", padx = 5, pady = 5)
 	label = tklabel(entryFrame, text='Set landmark Number: ')
-	landmarkVal <- get("landmarkNum", envir = .GlobalEnv)
 
-    entry = tkentry(entryFrame, textvariable=tclVar(landmarkVal))
-	sapply(list(label, entry), tkpack, side = "left", padx = 6)
-	assign("landmarkEntry", entry, envir = .GlobalEnv)
+    e$landmarkEntry = tkentry(entryFrame, textvariable=tclVar(e$landmarkNum))
+	sapply(list(label, e$landmarkEntry), tkpack, side = "left", padx = 6)
 
 	btnFrame <- ttkframe(win)
 	tkpack(btnFrame, fill = "x", padx = 5, pady = 5)
 	cancelBtn <- ttkbutton(btnFrame, text = "cancel", command = function() tkdestroy(win))
-	okBtn <- ttkbutton(btnFrame, text = "ok",command = function() onlandmarkNumOk())
+	okBtn <- ttkbutton(btnFrame, text = "ok",command = function() onlandmarkNumOk(e))
 
 	tkpack(ttklabel(btnFrame, text = " "), expand = TRUE, fill = "y", side = "left")
 	sapply(list(cancelBtn, okBtn), tkpack, side = "left", padx = 6)
 
-	assign("landmarkNumWin", win, envir = .GlobalEnv)
+	e$landmarkNumWin <- win
 	tkfocus(win)
 }
 
-savetoTpsFile <- function() {
-    currImgId <- get("currImgId", envir = .GlobalEnv)
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+savetoTpsFile <- function(e) {
+    currImgId <- e$currImgId
+    tpsDataList <- e$activeDataList
 
 	#check if the landmark is enough
-	dotNum <- digGetDotNum()
-	landmarkNum <- as.integer(get("landmarkNum", envir = .GlobalEnv))
+	dotNum <- digGetDotNum(e)
+	landmarkNum <- as.integer(e$landmarkNum)
 	if(dotNum < landmarkNum) {
 		alertBox("Incorrect number of landmarks")
 		return ()
@@ -476,10 +443,10 @@ savetoTpsFile <- function() {
     for(i in 1:length(tpsDataList)){
         # get image file list
         filelist[[length(filelist)+1]] <- tpsDataList[[i]][[1]]
-
+        
         #get scale list
         scalebar[[length(scalebar)+1]] <- tpsDataList[[i]][[2]]
-
+        
 		#get ratio
 		ratio <- tpsDataList[[i]][[6]]
 		fitImgH <- as.integer(tpsDataList[[i]][[7]][2])
@@ -513,7 +480,7 @@ savetoTpsFile <- function() {
     }
 
     dimnames(newdata)[[3]] <- as.list(filelist)
-
+    
     ##################################################################################
     # 7.30.2017 - EOC change: added conditional structure to avoid double ".tps" when
     # saving file
@@ -526,7 +493,7 @@ savetoTpsFile <- function() {
 }
 
 # get image file
-openSpecimens <- function() {
+openSpecimens <- function(e) {
 	#print("openSpecimens")
     #############################################################
     # 8.9.2017 EOC added "title" argument to tkgetOpenFile
@@ -552,52 +519,41 @@ openSpecimens <- function() {
 			ratio <- ratioV[1]
 			canvasW <- ratioV[2]
 			canvasH <- ratioV[3]
-
-			if(ratio == 0) {
+			
+			if(ratio == 0) { 
 				nSpecimens <- nSpecimens-1
-				next
+				next 
 			}
-
+		
 			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH))
         }
-
+		
 		if(nSpecimens > 0) {
 			#initialize
-			digitizeInit()
+			digitizeInit(e)
+			
+			e$activeDataList <- tpsDataList
+			e$digData <- tpsDataList		
+			e$currImgId <- 1
 
-			assign("activeDataList", tpsDataList, envir = .GlobalEnv)
-			assign("digData", tpsDataList, envir = .GlobalEnv)
-			assign("currImgId", 1, envir = .GlobalEnv)
-
-			digShowPicture()
-
-			specimenNumLabel <- get("specimenNumLabel", envir = .GlobalEnv)
-			tkconfigure(specimenNumLabel, text = paste("Number of Specimens: ", nSpecimens))
+			digShowPicture(e)
+			
+			tkconfigure(e$specimenNumLabel, text = paste("Number of Specimens: ", nSpecimens))
 		}
     }
 }
 
-addScaleDot <- function(x, y) {
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-    currImgId <- get("currImgId", envir = .GlobalEnv)
-	temp <- tpsDataList[[currImgId]][[5]]
-
-	temp[[length(temp)+1]] <- c(x, y)
-
-    return (length(temp))
-}
-
-updateDotList <- function(x, y, operate, moveDotId = 0, status="normal") {
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-    currImgId <- get("currImgId", envir = .GlobalEnv)
+updateDotList <- function(e, x, y, operate, moveDotId = 0, status="normal") {
+    tpsDataList <- e$activeDataList
+    currImgId <- e$currImgId
     temp <- tpsDataList[[currImgId]][[3]]
 	statusList <- tpsDataList[[currImgId]][[5]]
-    dotId <- getDotId(x, y)
+    dotId <- getDotId(e, x, y)
 	if(dotId != 0) {
 		newAdded <- FALSE
 	}else {
 		newAdded <- TRUE
-	}
+	}   
 
     if (operate == "add") {
         if(dotId == 0) {
@@ -615,168 +571,164 @@ updateDotList <- function(x, y, operate, moveDotId = 0, status="normal") {
     tpsDataList[[currImgId]][[3]] <- temp
 	tpsDataList[[currImgId]][[5]] <- statusList
 
-    assign("activeDataList", tpsDataList, envir = .GlobalEnv)
+    e$activeDataList <- tpsDataList
     return (newAdded)
 }
 
-dotAdd<-function(x, y) {
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+dotAdd<-function(e, x, y) {
+	tpsDataList <- e$activeDataList
 	if(length(tpsDataList) <= 0) {
 		return ()
 	}
 
     x<-as.integer(x)
     y<-as.integer(y)
+	
+	canvas <- e$activeCanvas
+	scaleDotNum <- e$scaleDotNum
 
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
-
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
+	scaleMode <- e$scaleMode
 	if(scaleMode) {
-		scaleDotNum <<- scaleDotNum+1
+		scaleDotNum <- scaleDotNum+1
 		tkdelete(canvas, "scaleline")
         item <- tkcreate(canvas, "oval", x - 2, y - 2, x + 2, y + 2,
                          width=1, outline="black", fill="red")
 		tkaddtag(canvas, "scale", "withtag", item)
 
 		if(scaleDotNum == 1) {
-			assign("scaleDot1", c(x,y), envir = .GlobalEnv)
+			e$scaleDot1 <- c(x,y)
+			e$scaleDotNum <- scaleDotNum
 		} else if(scaleDotNum == 2) {
-			assign("scaleDot2", c(x,y), envir = .GlobalEnv)
-			scaleDot1 <- get("scaleDot1", envir = .GlobalEnv)
-			item <- tkcreate(canvas, "line", scaleDot1[1], scaleDot1[2], scaleDot2[1], scaleDot2[2], width=1, fill="red")
+			e$scaleDot2 <- c(x,y)
+			e$scaleDotNum <- scaleDotNum
+			scaleDot1 <- e$scaleDot1
+			item <- tkcreate(canvas, "line", scaleDot1[1], scaleDot1[2], x, y, width=1, fill="red")
 			tkaddtag(canvas, "scaleline", "withtag", item)
-			assign("scaleMode", 0, envir = .GlobalEnv)
+			e$scaleMode <- 0
 		}
 	} else {
 		fill <- "red"
 		outline <- "black"
 		dotStatus <- "normal"
-		missLandmarkVar <- get("missLandmark", envir = .GlobalEnv)
-		if (tclvalue(missLandmarkVar) == "1") {
+		if (tclvalue(e$missLandmarkVar) == "1") {
 			fill <- "black"
 			outline <- "red"
-			dotStatus <- "black"
-			updateMissLandMark(0)
+			dotStatus <- "black"			
+			updateMissLandMark(e, 0)
 		}
-		res <- updateDotList(x, y, "add", status=dotStatus)
+		res <- updateDotList(e, x, y, "add", status=dotStatus)
 
-		if(res) {
-
+		if(res) {			
 			item <- tkcreate(canvas, "oval", x - 6, y - 6, x + 6, y + 6,
 							 width=1, outline=outline,
 							 fill=fill)
 			tkaddtag(canvas, "point", "withtag", item)
 
 			#add label for this dot
-			dotNum <- digGetDotNum()
-			labelLandmarkVar <- get("labelLandmark", envir = .GlobalEnv)
-			if((tclvalue(labelLandmarkVar) == "1")) {
-				label(dotNum, x, y)
+			dotNum <- digGetDotNum(e)
+			if((tclvalue(e$labelLandmarkVar) == "1")) {
+				label(e, dotNum, x, y)
 			}
 
-			landMarkNumLabel <- get("landMarkNumLabel", envir = .GlobalEnv)
-			tkconfigure(landMarkNumLabel, text = paste("Number of Landmarks: ", dotNum))
+			tkconfigure(e$landMarkNumLabel, text = paste("Number of Landmarks: ", dotNum))
 		}
 	}
 }
 
-updateMissLandMark <-function(value) {
-	missLandmarkVar <-tclVar(value)
-	missLandmarkCheBtn  <- get("missLandmarkCheBtn", envir = .GlobalEnv)
-	tkconfigure(missLandmarkCheBtn, variable=missLandmarkVar)
-	assign("missLandmark", missLandmarkVar, envir = .GlobalEnv)
+updateMissLandMark <-function(e, value) {
+	e$missLandmarkVar <-tclVar(value)
+	tkconfigure(e$missLandmarkCheBtn, variable=e$missLandmarkVar)
 }
-
-dotSelect<-function(x, y) {
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
-	if(!scaleMode) {
-		canvas <- get("activeCanvas", envir = .GlobalEnv)
+			
+dotSelect<-function(e, x, y) {
+	if(!e$scaleMode) {
+		canvas <- e$activeCanvas
 		x <- as.numeric(x)
 		y <- as.numeric(y)
 		tkdtag(canvas, "selected")
 		tkaddtag(canvas, "selected", "withtag", "current")
 		tkitemraise(canvas,"current")
-		dotId <- getDotId(x, y)
-		assign("selectedDot", dotId, envir = .GlobalEnv)
-		lastX <<- x
-		lastY <<- y
+		dotId <- getDotId(e, x, y)
+		e$selectedDot <- dotId
 	}
 }
 
-dotRelease <- function(x, y) {
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
-	if(!scaleMode) {
+dotRelease <- function(e, x, y) {
+	if(length(e$activeDataList) <= 0) {
+		return ()
+	}
+	
+	if(!e$scaleMode) {
 		#redraw the label
-		canvas <- get("activeCanvas", envir = .GlobalEnv)
+		canvas <- e$activeCanvas
 		tkdelete(canvas, "label")
-		onLabelLandMark()
-		assign("selectedDot", 0, envir = .GlobalEnv)
+		onLabelLandMark(e)
+		e$selectedDot <- 0
 	}
 }
 
-dotMove <- function(x, y) {
+dotMove <- function(e, x, y) {
     ## This procedure is invoked during mouse motion events.
     ## It drags the current item.
     ##
     ## Arguments:
     ## x, y -    The coordinates of the mouse.
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
-	if(!scaleMode) {
+
+	if(length(e$activeDataList) <= 0) {
+		return ()
+	}
+	
+	if(!e$scaleMode) {
 		x <- as.numeric(x)
 		y <- as.numeric(y)
-
-		tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-		currImgId <- get("currImgId", envir = .GlobalEnv)
+		tpsDataList <- e$activeDataList
+		currImgId <- e$currImgId
 		temp <- tpsDataList[[currImgId]][[3]]
-		dotId <- get("selectedDot", envir = .GlobalEnv)
-
+		dotId <- e$selectedDot
 		if(dotId) {
-			canvas <- get("activeCanvas", envir = .GlobalEnv)
+			canvas <- e$activeCanvas
 			tkmove(canvas, "selected", x - temp[[dotId]][1], y -  temp[[dotId]][2])
-			updateDotList(x, y, "move", dotId)
+			updateDotList(e, x, y, "move", dotId)
 		}
 	}
 }
 
-digRemoveDotOk <-function(x, y) {
-	updateDotList(x, y, "remove")
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
+digRemoveDotOk <-function(e, x, y) {
+	updateDotList(e, x, y, "remove")
+	canvas <- e$activeCanvas
 	tkdelete(canvas, "point")
 	tkdelete(canvas, "label")
-	currImgId <- get("currImgId", envir = .GlobalEnv)
-	showDots(currImgId)
+
+	showDots(e)
 
 	#redraw the label
-	onLabelLandMark()
+	onLabelLandMark(e)
 
 	#update landmark number
-	dotNum <- digGetDotNum()
-	landMarkNumLabel <- get("landMarkNumLabel", envir = .GlobalEnv)
-	tkconfigure(landMarkNumLabel, text = paste("Number of Landmarks: ", dotNum))
+	dotNum <- digGetDotNum(e)
+	tkconfigure(e$landMarkNumLabel, text = paste("Number of Landmarks: ", dotNum))
 
-	win <- get("removeWin", envir = .GlobalEnv)
+	win <- e$removeWin
 	tkdestroy(win)
 }
 
-digGetDotNum <- function() {
-	#check if the landmark is enough
-
-	imgId <- get("currImgId", envir = .GlobalEnv)
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	statusList <- tpsDataList[[currImgId]][[5]]
-
+digGetDotNum <- function(e) {
+	#check if the landmark is enough 
+	imgId <- e$currImgId
+	tpsDataList <- e$activeDataList
+	statusList <- tpsDataList[[imgId]][[5]]	
+	
 	len <- 0
 	if(length(statusList)) {
 		for(i in 1:length(statusList)) {
-			if(statusList[[i]] != "removed") {len = len+1}
-		}
+			if(statusList[[i]] != "removed") {len = len+1}		
+		}	
 	}
 	return (len)
 }
 
-dotRemove <-function(x, y) {
-	scaleMode <- get("scaleMode", envir = .GlobalEnv)
-	if(!scaleMode) {
-		popUpRemoveWindow(x, y, 'Do you want to delete this landmark?', "digdot")
+dotRemove <-function(e, x, y) {
+	if(!e$scaleMode) {
+		popUpRemoveWindow(e, x, y, 'Do you want to delete this landmark?', "digdot")
 	}
 }

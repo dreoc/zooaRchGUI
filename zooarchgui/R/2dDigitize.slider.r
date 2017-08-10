@@ -1,50 +1,52 @@
 #sliderFiles <<- ""
 
-clearSliderDot <- function() {
-	assign("sliderDot1", -1, envir = .GlobalEnv)
-	assign("sliderDot2", -1, envir = .GlobalEnv)
-	assign("sliderDotNum", 0, envir = .GlobalEnv)
+clearSliderDot <- function(e) {
+	e$sliderDot1 <- -1
+	e$sliderDot2 <- -1
+	e$sliderDotNum <- 0
 }
 
-sliderInit <- function() {
-	clearSliderDot()
+sliderInit <- function(e) {
+	clearSliderDot(e)
 	#sliderFiles <<- ""
-	assign("sliderData", list(), envir = .GlobalEnv)
-	assign("sliderCurrImgId", 1, envir = .GlobalEnv)
+	e$sliderData <- list()
+	e$sliderCurrImgId <- 1
 }
 
-sliderMainMenu <- function(wnd) {
-    topMenu <- tkmenu(wnd)
+sliderMainMenu <- function(e) {
+    topMenu <- tkmenu(e$wnd)
       
     #File Menu
     fileMenu <- tkmenu(topMenu, tearoff = FALSE)  # TOP menu
-    tkadd(fileMenu, "command", label = "Open TPS file", command = function() openTpsFile())
-    tkadd(fileMenu, "command", label = "Open NTS file", command = function() openNtsFile())
-    tkadd(fileMenu, "command", label = "Save to CSV",command = function() saveToCsv())
-    tkadd(fileMenu, "command", label = "Exit", command = function() tkdestroy(wnd))     
+    tkadd(fileMenu, "command", label = "Open TPS file", command = function() openTpsFile(e))
+    #tkadd(fileMenu, "command", label = "Open NTS file", command = function() openNtsFile())
+    tkadd(fileMenu, "command", label = "Save to CSV",command = function() saveToCsv(e))
+    tkadd(fileMenu, "command", label = "Exit", command = function() tkdestroy(e$wnd))     
 	
 	importMenu <- tkmenu(fileMenu, tearoff = FALSE)
 	fileName <- paste(getwd(), "/sliderTpsFiles.txt", sep = "")	
 	if(file.exists(fileName)) {
-		sliderFiles <<- scan(file = fileName, what = "char", sep = "\n", quiet = TRUE)
-		#assign("sliderFiles", sliderFiles, envir = .GlobalEnv)
+		sliderFiles <- scan(file = fileName, what = "char", sep = "\n", quiet = TRUE)
 		for(i in 1:length(sliderFiles)) {
-			tkadd(importMenu, "command", label = sliderFiles[i],command = function() importFile(i))	
+			tkadd(importMenu, "command", label = sliderFiles[i],command = function() importFile(e, i))	
 		}
+		e$sliderFiles <- sliderFiles
 	}
 	tkadd(fileMenu, "cascade", label = "Import", menu = importMenu)	
 	tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
-	assign("sliderMenuTree", topMenu, envir = .GlobalEnv)
+	e$sliderMenuTree <- topMenu
 }
 
-bindSliderCanvasEvent<-function(canvas) {
-    tkitembind(canvas, "point", "<1>", sliderOnDotSelect)
-	tkitembind(canvas, "point", "<3>", itemRemove)	
+bindSliderCanvasEvent<-function(e, canvas) {
+    tkitembind(canvas, "point", "<1>", function(x, y) {
+	sliderOnDotSelect(e, x, y)})
+	tkitembind(canvas, "point", "<3>", function(x, y) {
+	itemRemove(e, x, y)})	
 }
 
-sliderGetLineIndex <- function(x, y) {
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-    imgId <- get("currImgId", envir = .GlobalEnv)
+sliderGetLineIndex <- function(e, x, y) {
+    tpsDataList <- e$activeDataList
+    imgId <- e$currImgId
 	coords <- tpsDataList[[imgId]][[3]]
     lineList <- tpsDataList[[imgId]][[8]]
 	lineStatus <- tpsDataList[[1]][[9]]  
@@ -61,39 +63,38 @@ sliderGetLineIndex <- function(x, y) {
 			}                  
 		}	
 	}
-	print(paste("not found line", item))
+	print(paste("not found line", x, y))
 	return (0)
 }
 
-sliderDotCancel <- function(K) {
-	tab <- get("tab", envir = .GlobalEnv)
-	if((tab == 1) && (K == "Escape")) {
-		showDots(currImgId)
-		clearSliderDot()
+sliderDotCancel <- function(e, K) {
+	if((e$tab == 1) && (K == "Escape")) {
+		currImgId <- e$currImgId
+		showDots(e)
+		clearSliderDot(e)
 	}	
 }
 
-sliderOnDotSelect <-function(x, y) {
-	dotId <- getDotId(x,y)
+sliderOnDotSelect <-function(e, x, y) {
+	dotId <- getDotId(e, x,y)
 	
-	if(dotId != 0) {
-	
-		canvas <- get("activeCanvas", envir = .GlobalEnv)
-		currImgId <- get("currImgId", envir = .GlobalEnv)    
-		tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+	if(dotId != 0) {	
+		canvas <- e$activeCanvas
+		currImgId <- e$currImgId    
+		tpsDataList <- e$activeDataList
 		coords <- tpsDataList[[currImgId]][[3]] 
 		dotStatus <- tpsDataList[[currImgId]][[5]]
-		sliderDot1 <- get("sliderDot1", envir = .GlobalEnv)
-		sliderDotNum <- get("sliderDotNum", envir = .GlobalEnv)
+		sliderDot1 <- e$sliderDot1
+		sliderDotNum <- e$sliderDotNum
 		
 		x <- coords[[dotId]][1] 
 		y <- coords[[dotId]][2] 
  
 		if(sliderDotNum == 0) {			
-			assign("sliderDot1", dotId, envir = .GlobalEnv)
+			e$sliderDot1 <- dotId
 			#change the color of the dot to "pink"
-			changeCurrDotColor(x, y, "black", "pink")			
-			assign("sliderDotNum", sliderDotNum+1, envir = .GlobalEnv)			
+			changeCurrDotColor(e, x, y, "black", "pink")			
+			e$sliderDotNum <- sliderDotNum+1		
 		} else if(sliderDotNum == 1) {
 			if(dotId == sliderDot1) {
 				alertBox("Duplicate dot, invalid")
@@ -105,12 +106,12 @@ sliderOnDotSelect <-function(x, y) {
 				return ()
 			} 
 		
-			assign("sliderDot2", dotId, envir = .GlobalEnv)			
+			e$sliderDot2 <- dotId			
 			#change the color of the dot to "pink"	
-			changeCurrDotColor(x, y, "black", "pink")		
-			assign("sliderDotNum", sliderDotNum+1, envir = .GlobalEnv)			
+			changeCurrDotColor(e, x, y, "black", "pink")		
+			e$sliderDotNum <- sliderDotNum+1			
 		} else if(sliderDotNum == 2) {
-			sliderDot2 <- get("sliderDot2", envir = .GlobalEnv)
+			sliderDot2 <- e$sliderDot2
 			if((dotId == sliderDot1)||(dotId == sliderDot2)) {
 				alertBox("duplicate dot, invalid")
 				return ()
@@ -143,38 +144,37 @@ sliderOnDotSelect <-function(x, y) {
 			status[[length(status)+1]] <- "normal"			
 			tpsDataList[[1]][[9]] <- status
 			
-			assign("activeDataList", tpsDataList, envir = .GlobalEnv)
+			e$activeDataList <- tpsDataList
 		
 			#update line number
-			lineNumLabel <- get("sliderLineNumLabel", envir = .GlobalEnv)
 			nlines <- getLineNum(status)
-			tkconfigure(lineNumLabel, text = paste("n sliders =", nlines))
+			tkconfigure(e$sliderLineNumLabel, text = paste("n sliders =", nlines))
 		
-			showDots(currImgId)
+			showDots(e)
 			#clear sliderDot
-			clearSliderDot()
+			clearSliderDot(e)
 		}		
 	}
 }
 
-changeCurrDotColor <- function(x, y, outline, fill) {
-	canvas <- get("activeCanvas", envir = .GlobalEnv)	
+changeCurrDotColor <- function(e, x, y, outline, fill) {
+	canvas <- e$activeCanvas	
 	tkdelete(canvas, "current")	
 	item <- tkcreate(canvas, "oval", x-6, y-6, x+6, y+6, width=1, outline=outline, fill=fill)
     tkaddtag(canvas, "point", "withtag", item)
 }
 
-sliderRemoveLineOk <-function(x, y) {
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
+sliderRemoveLineOk <-function(e, x, y) {
+	canvas <- e$activeCanvas
 	item <- tkfind(canvas, "closest", x, y)
 	
 	#update line status
-	currImgId <- get("currImgId", envir = .GlobalEnv)
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	myPrint(paste(currImgId, "line", item, "is to be deleted"))
+	currImgId <- e$currImgId
+	tpsDataList <- e$activeDataList
+	#myPrint(paste(currImgId, "line", item, "is to be deleted"))
 	lineNumText <- ""
 
-	index <- sliderGetLineIndex(x, y)
+	index <- sliderGetLineIndex(e, x, y)
 	if(index != 0) {
 		#delete the lines among the tree dots
 		lineList <- tpsDataList[[currImgId]][[8]]
@@ -196,8 +196,8 @@ sliderRemoveLineOk <-function(x, y) {
 			tpsDataList[[i]][[5]] <- dotStatus
 		}
 		
-		assign("activeDataList", tpsDataList, envir = .GlobalEnv)
-		showDots(currImgId)	
+		e$activeDataList <- tpsDataList
+		showDots(e)	
 		
 		lineNumText <- "n sliders:"
 	}	
@@ -205,11 +205,10 @@ sliderRemoveLineOk <-function(x, y) {
 
 	#update line numbers
 	if(lineNumText != "") {
-		lineNumLabel <- get("sliderLineNumLabel", envir = .GlobalEnv)
 		nlines <- getLineNum(tpsDataList[[1]][[9]])
-		tkconfigure(lineNumLabel, text = paste(lineNumText, nlines))
+		tkconfigure(e$sliderLineNumLabel, text = paste(lineNumText, nlines))
 	}
 	
-	win <- get("removeWin", envir = .GlobalEnv) 
+	win <- e$removeWin
 	tkdestroy(win)	
 }

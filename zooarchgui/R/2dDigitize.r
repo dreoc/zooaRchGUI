@@ -13,63 +13,65 @@ isDebug <- 0
 #tpsDataList[1][[8]]: slider line coordinates list(c(dot1, dot2, dot3, line1, line2))
 #tpsDataList[1][[9]]: line status ('normal', 'removed')
 
-switchTab <- function(W, x, y) {
+switchTab <- function(e, W, x, y) {
 	id <- tcl(W, "identify", "tab", x, y)
 
 	#record activeDataList and current image id
-	activeDataList <- get("activeDataList", envir = .GlobalEnv)
-	currImgId <- get("currImgId", envir = .GlobalEnv)
-	tab <- get("tab", envir = .GlobalEnv)
+	activeDataList <- e$activeDataList
+	tab <- e$tab
 	if(tab == 0) {
-		assign("digData", activeDataList, envir = .GlobalEnv)
-		assign("dotCurrImgId", currImgId, envir = .GlobalEnv)
+		e$digData <- activeDataList
+		e$dotCurrImgId <- e$currImgId
 	}else if (tab == 1) {
-		assign("linkData", activeDataList, envir = .GlobalEnv)
-		assign("linkCurrImgId", currImgId, envir = .GlobalEnv)
+		e$linkData <- activeDataList
+		e$linkCurrImgId <- e$currImgId
 	}else if (tab == 2) {
-		assign("sliderData", activeDataList, envir = .GlobalEnv)
-		assign("sliderCurrImgId", currImgId, envir = .GlobalEnv)
+		e$sliderData <- activeDataList
+		e$sliderCurrImgId <- e$currImgId
 	}
 
 	#update canvas and activeDataList
 	if (tclvalue(id) == 0) {
-		assign("tab", 0, envir = .GlobalEnv)
-		menuTree <- get("dotMenuTree", envir = .GlobalEnv)
-		canvas <- get("digCanvas", envir = .GlobalEnv)
-		dataList <- get("digData", envir = .GlobalEnv)
-		currImgId <- get("dotCurrImgId", envir = .GlobalEnv)
+		e$tab <- 0
+		menuTree <- e$dotMenuTree
+		canvas <- e$digCanvas
+		dataList <- e$digData
+		currImgId <- e$dotCurrImgId
 	} else if (tclvalue(id) == 1) {
-		assign("tab", 1, envir = .GlobalEnv)
-		canvas <- get("linkCanvas", envir = .GlobalEnv)
-		dataList <- get("linkData", envir = .GlobalEnv)
-		currImgId <- get("linkCurrImgId", envir = .GlobalEnv)
-		menuTree <- get("linkMenuTree", envir = .GlobalEnv)
+		e$tab <- 1
+		canvas <- e$linkCanvas
+		dataList <- e$linkData
+		currImgId <- e$linkCurrImgId
+		menuTree <- e$linkMenuTree
 	}else if (tclvalue(id) == 2) {
-		assign("tab", 2, envir = .GlobalEnv)
-		canvas <- get("sliderCanvas", envir = .GlobalEnv)
-		dataList <- get("sliderData", envir = .GlobalEnv)
-		currImgId <- get("sliderCurrImgId", envir = .GlobalEnv)
-		menuTree <- get("sliderMenuTree", envir = .GlobalEnv)
+		e$tab <- 2
+		canvas <- e$sliderCanvas
+		dataList <- e$sliderData
+		currImgId <- e$sliderCurrImgId
+		menuTree <- e$sliderMenuTree
 	}
 
 	#switch the Menu
-	wnd <- get("wnd", envir = .GlobalEnv)
+	wnd <- e$wnd
 	tkconfigure(wnd, menu = menuTree)
 
-	assign("activeCanvas", canvas, envir = .GlobalEnv)
-	assign("activeDataList", dataList, envir = .GlobalEnv)
-	assign("currImgId", currImgId, envir = .GlobalEnv)
+	e$activeCanvas <- canvas
+	e$activeDataList <- dataList
+	e$currImgId <- currImgId
 }
 
-mainFrame <-function(wnd) {
-	tn <- ttknotebook(wnd)
+mainFrame <-function(e) {
+	#print("mainFrame")
+	tn <- ttknotebook(e$wnd)
 
-	tkbind(tn, '<Button-1>', switchTab)
-	tkbind(wnd, "<Key>", sliderDotCancel)
+	tkbind(tn, '<Button-1>', function(W, x, y) {
+	switchTab(e, W, x, y)})
+	tkbind(e$wnd, "<Key>", function(K) {
+	sliderDotCancel(e, K)})
 
-	sliderFrame <- createFrame(tn, "slider")
-	linkFrame <- createFrame(tn, "link")
-	digitizeFrame <- createFrame(tn, "digitize")
+	sliderFrame <- createFrame(e, tn, "slider")
+	linkFrame <- createFrame(e, tn, "link")
+	digitizeFrame <- createFrame(e, tn, "digitize")
 
 	tkadd(tn,digitizeFrame,text="2dDigitize")
 	tkadd(tn,linkFrame,text="link")
@@ -78,17 +80,17 @@ mainFrame <-function(wnd) {
 	tkpack(tn)
 }
 
-createFrame <- function(parent, id = "") {
-
+createFrame <- function(e, parent, id = "") {
+#print("createFrame")
 	myFrame <- ttkframe(parent)
 	displayFrame <- ttkframe(myFrame)
 	imgFrame <- ttkframe(displayFrame)
 	if(id == "digitize") {
-		ctlFrame <- digCreateCtlFrame(displayFrame)
+		ctlFrame <- digCreateCtlFrame(e, displayFrame)
 	}else if (id == "link"){
-		ctlFrame <- createCtlFrame(displayFrame, "link")
+		ctlFrame <- createCtlFrame(e, displayFrame, "link")
 	}else if(id == "slider") {
-		ctlFrame <- createCtlFrame(displayFrame, "slider")
+		ctlFrame <- createCtlFrame(e, displayFrame, "slider")
 	}
 	tkpack(displayFrame)
 	sapply(list(imgFrame, ctlFrame), tkpack, side = "left", padx = 6)
@@ -96,30 +98,30 @@ createFrame <- function(parent, id = "") {
 	canvas <- tkcanvas(imgFrame, relief="raised", width=800, height=600, background='white')
 	tkpack(canvas, side="top", fill="x")
 
-	btnFrame <- createBtnFrame(myFrame)
+	btnFrame <- createBtnFrame(e, myFrame)
 	tkpack(btnFrame)
 
 	tkpack(myFrame)
 
 	if(id == "digitize") {
-		bindDigCanvasEvent(canvas)
-		assign("digCanvas", canvas, envir = .GlobalEnv)
-		assign("activeCanvas", canvas, envir = .GlobalEnv)
+		bindDigCanvasEvent(e, canvas)
+		e$digCanvas <- canvas
+		e$activeCanvas <- canvas
 	}else if(id == "link"){
-		bindLinkCanvasEvent(canvas)
-		assign("linkCanvas", canvas, envir = .GlobalEnv)
+		bindLinkCanvasEvent(e, canvas)
+		e$linkCanvas <- canvas
 	}else {
-		bindSliderCanvasEvent(canvas)
-		assign("sliderCanvas", canvas, envir = .GlobalEnv)
+		bindSliderCanvasEvent(e, canvas)
+		e$sliderCanvas <- canvas
 	}
 
 	return (myFrame)
 }
 
-createBtnFrame <- function(parent) {
+createBtnFrame <- function(e, parent) {
 	btnFrame <- ttkframe(parent)
-	prevBtn <- ttkbutton(btnFrame, text = "< Previous", command = onPrevious)
-    nextBtn <- ttkbutton(btnFrame, text = "Next >",command = onNext)
+	prevBtn <- ttkbutton(btnFrame, text = "< Previous", command = function() onPrevious(e))
+    nextBtn <- ttkbutton(btnFrame, text = "Next >",command = function() onNext(e))
 
     tkpack(ttklabel(btnFrame, text = " "), expand = TRUE, fill = "both", side = "left")
     sapply(list(prevBtn, nextBtn), tkpack, side = "left", padx = 6)
@@ -128,7 +130,7 @@ createBtnFrame <- function(parent) {
 	return (btnFrame)
 }
 
-createCtlFrame <-function(parent, id = "") {
+createCtlFrame <-function(e, parent, id = "") {
 	ctlFrame <- ttkframe(parent)
 	path <- ttklabel(ctlFrame, text = "Specimen Id: NA")
 	tkpack(path)
@@ -137,11 +139,11 @@ createCtlFrame <-function(parent, id = "") {
 	tkpack(lineNumLabel)
 
 	if(id == "slider") {
-		assign("sliderImgPath", path, envir = .GlobalEnv)
-		assign("sliderLineNumLabel", lineNumLabel, envir = .GlobalEnv)
+		e$sliderImgPath <- path
+		e$sliderLineNumLabel <- lineNumLabel
 	}else if(id == "link") {
-		assign("linkImgPath", path, envir = .GlobalEnv)
-		assign("linkLineNumLabel", lineNumLabel, envir = .GlobalEnv)
+		e$linkImgPath <- path
+		e$linkLineNumLabel <- lineNumLabel
 	}
 
 	return (ctlFrame)
@@ -165,16 +167,15 @@ getLineNum <- function(lineStatus) {
 	return (len)
 }
 
-itemRemove <-function(x, y) {
-	tab <- get("tab", envir = .GlobalEnv)
-	if(tab == 1) {
-		popUpRemoveWindow(x, y, 'Do you want to delete this line?', "linkLine")
-	}else if(tab ==2) {
-		popUpRemoveWindow(x, y, 'Do you want to delete this line?', "sliderLine")
+itemRemove <-function(e, x, y) {
+	if(e$tab == 1) {
+		popUpRemoveWindow(e, x, y, 'Do you want to delete this line?', "linkLine")
+	}else if(e$tab ==2) {
+		popUpRemoveWindow(e, x, y, 'Do you want to delete this line?', "sliderLine")
 	}
 }
 
-popUpRemoveWindow <- function(x, y, msg, item) {
+popUpRemoveWindow <- function(e, x, y, msg, item) {
 	win <- tktoplevel()
 
 	label = tklabel(win, text=msg)
@@ -184,32 +185,33 @@ popUpRemoveWindow <- function(x, y, msg, item) {
 	tkpack(btnFrame, fill = "x", padx = 5, pady = 5)
 	cancelBtn <- ttkbutton(btnFrame, text = "cancel", command = function() tkdestroy(win))
 	if(item == "digdot") {
-		okBtn <- ttkbutton(btnFrame, text = "ok",command = function() digRemoveDotOk(x, y))
+		okBtn <- ttkbutton(btnFrame, text = "ok",command = function() digRemoveDotOk(e, x, y))
 	}else if(item == "linkLine") {
-		okBtn <- ttkbutton(btnFrame, text = "ok",command = function() linkRemoveLineOk(x, y))
+		okBtn <- ttkbutton(btnFrame, text = "ok",command = function() linkRemoveLineOk(e, x, y))
 	}else if(item == "sliderLine") {
-		okBtn <- ttkbutton(btnFrame, text = "ok",command = function() sliderRemoveLineOk(x, y))
+		okBtn <- ttkbutton(btnFrame, text = "ok",command = function() sliderRemoveLineOk(e, x, y))
 	}
 
 	tkpack(ttklabel(btnFrame, text = " "), expand = TRUE, fill = "y", side = "left")
 	sapply(list(cancelBtn, okBtn), tkpack, side = "left", padx = 6)
 
-	assign("removeWin", win, envir = .GlobalEnv)
+	e$removeWin <- win
 	tkfocus(win)
 }
 
-showLines <- function(imgId) {
+showLines <- function(e) {
 	#print("begin showLines")
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+    tpsDataList <- e$activeDataList
+	imgId <- e$currImgId
 	coords <- tpsDataList[[imgId]][[3]]
     lineList <- tpsDataList[[imgId]][[8]]
 	status <- tpsDataList[[1]][[9]]
 
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
+	canvas <- e$activeCanvas
 	tkdelete(canvas, "line")
-	nlines <- 0
-	tab <- get("tab", envir = .GlobalEnv)
-
+	nlines <- 0	
+	tab <- e$tab
+	
     if(length(lineList)) {
         for(i in 1:length(status)){
             if(status[[i]] == "removed") {next}
@@ -223,8 +225,8 @@ showLines <- function(imgId) {
 			x2 <- coords[[dot2]][1]
             y2 <- coords[[dot2]][2]
 
-			item <- tkcreate(activeCanvas, "line", x1, y1, x2, y2, width=2, fill="green")
-			tkaddtag(activeCanvas, "line", "withtag", item)
+			item <- tkcreate(canvas, "line", x1, y1, x2, y2, width=2, fill="green")
+			tkaddtag(canvas, "line", "withtag", item)
 			#print(paste(imgId,"showLines: draw line", item, dot1, dot2))
 			if(tab == 1) {
 				tpsDataList[[imgId]][[8]][[i]] <- c(dot1, dot2, item)
@@ -232,34 +234,31 @@ showLines <- function(imgId) {
 				dot3 <- as.integer(lineList[[i]][3])
 				x3 <- coords[[dot3]][1]
 				y3 <- coords[[dot3]][2]
-				item2 <- tkcreate(activeCanvas, "line", x2, y2, x3, y3, width=2, fill="green")
-				tkaddtag(activeCanvas, "line", "withtag", item)
+				item2 <- tkcreate(canvas, "line", x2, y2, x3, y3, width=2, fill="green")
+				tkaddtag(canvas, "line", "withtag", item)
 				tpsDataList[[imgId]][[8]][[i]] <- c(dot1, dot2, dot3, item, item2)
 			}
         }
 
-		assign("activeDataList", tpsDataList, envir = .GlobalEnv)
+		e$activeDataList <- tpsDataList
 
 		if(tab == 1) {
-			lineNumLabel <- get("linkLineNumLabel", envir = .GlobalEnv)
-			tkconfigure(lineNumLabel, text = paste("n links =", nlines))
+			tkconfigure(e$linkLineNumLabel, text = paste("n links =", nlines))
 		}else if(tab == 2) {
-			lineNumLabel <- get("sliderLineNumLabel", envir = .GlobalEnv)
-			tkconfigure(lineNumLabel, text = paste("n sliders =", nlines))
+			tkconfigure(e$sliderLineNumLabel, text = paste("n sliders =", nlines))
 		}
     }
 }
 
-showDots <- function(imgId) {
+showDots <- function(e) {
 	#print("begin showDots")
-
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+	imgId <- e$currImgId
+    tpsDataList <- e$activeDataList
     coords <- tpsDataList[[imgId]][[3]]
 	statusList <- tpsDataList[[imgId]][[5]]
 
-	canvas <- get("activeCanvas", envir = .GlobalEnv)
+	canvas <- e$activeCanvas
 	tkdelete(canvas, "point")
-
     if(length(coords)) {
         for(i in 1:length(statusList)){
             if(statusList[[i]] == "removed") {next}
@@ -322,68 +321,63 @@ getRatio <- function(imgFile) {
 	return (c(ratio, fitCanvasW, fitCanvasH))
 }
 
-showPicture <- function() {
-	#myPrint("enter showPicture")
+showPicture <- function(e) {
+	#print("enter showPicture")
 	#clear canvas
-  canvas <- get("activeCanvas", envir = .GlobalEnv)
-  tkdelete(canvas, "all")
+    canvas <- e$activeCanvas
+    tkdelete(canvas, "all")
 
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	id <- get("currImgId", envir = .GlobalEnv)
+	tpsDataList <- e$activeDataList
+	id <- e$currImgId
 	ratio <- tpsDataList[[id]][[6]]
 	canvasH <- tpsDataList[[id]][[7]][2]
 	canvasW <- tpsDataList[[id]][[7]][1]
 	tkconfigure(canvas, width=canvasW, height=canvasH)
 
-	showLines(id)
-	showDots(id)
+	showLines(e)
+	showDots(e)
 
-	tab <- get("tab", envir = .GlobalEnv)
-	if(tab != 0) {
-		updateCtrlFrame()
+	if(e$tab != 0) {
+		updateCtrlFrame(e)
 	}
 }
 
-updateCtrlFrame <- function() {
-
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-	tab <- get("tab", envir = .GlobalEnv)
-	if(tab == 1) {
-		lineNumLabel <- get("linkLineNumLabel", envir = .GlobalEnv)
+updateCtrlFrame <- function(e) {
+	tpsDataList <- e$activeDataList
+	if(e$tab == 1) {
+		lineNumLabel <- e$linkLineNumLabel
 		lineText <- "n links ="
-		pathLabel <- get("linkImgPath", envir = .GlobalEnv)
-	}else if(tab == 2) {
-		lineNumLabel <- get("sliderLineNumLabel", envir = .GlobalEnv)
+		pathLabel <- e$linkImgPath
+	}else if(e$tab == 2) {
+		lineNumLabel <- e$sliderLineNumLabel
 		lineText <- "n sliders ="
-		pathLabel <- get("sliderImgPath", envir = .GlobalEnv)
+		pathLabel <- e$sliderImgPath
 	}
 
 	nlines <- 0
 	specID <- "NA"
 	if(length(tpsDataList) > 0) {
 		nlines <- getLineNum(tpsDataList[[1]][[9]])
-		specID <- tpsDataList[[currImgId]][1]
+		specID <- tpsDataList[[e$currImgId]][1]
 	}
 
 	tkconfigure(lineNumLabel, text = paste(lineText, nlines))
     tkconfigure(pathLabel, text = paste("Specimen Id: ", specID))
 }
 
-onNext <- function() {
-	tab <- get("tab", envir = .GlobalEnv)
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+onNext <- function(e) {
+    tpsDataList <- e$activeDataList
 	nSpecimens <- length(tpsDataList)
 	if(nSpecimens > 0) {
-		if(tab == 0) {
-			digOnNext()
+		if(e$tab == 0) {
+			digOnNext(e)
 		}else {
-			currImgId <- get("currImgId", envir = .GlobalEnv)
+			currImgId <- e$currImgId
 
 			#check if it is the last picture
 			if(currImgId < nSpecimens) {
-				currImgId <- currImgId+1
-				assign("currImgId", currImgId, envir = .GlobalEnv)
-				showPicture()
+				e$currImgId <- currImgId +1
+				showPicture(e)
 			} else {
 				alertBox("It's the last specimen")
 			}
@@ -391,18 +385,16 @@ onNext <- function() {
 	}
 }
 
-onPrevious <- function() {
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+onPrevious <- function(e) {
+    tpsDataList <- e$activeDataList
 	if(length(tpsDataList) > 0) {
-		tab <- get("tab", envir = .GlobalEnv)
-		if(tab == 0) {
-			digOnPrevious()
+		if(e$tab == 0) {
+			digOnPrevious(e)
 		}else {
-			currImgId <- get("currImgId", envir = .GlobalEnv)
+			currImgId <- e$currImgId
 			if(currImgId > 1) {
-				currImgId <- currImgId-1
-				assign("currImgId", currImgId, envir = .GlobalEnv)
-				showPicture()
+				e$currImgId <- currImgId -1
+				showPicture(e)
 			} else {
 				alertBox("It's the first specimen")
 			}
@@ -410,8 +402,8 @@ onPrevious <- function() {
 	}
 }
 
-saveToCsv <- function() {
-	tpsDataList <- get("activeDataList", envir = .GlobalEnv)
+saveToCsv <- function(e) {
+	tpsDataList <- e$activeDataList
 	if(length(tpsDataList) <= 0) {
 		alertBox("Nothing to be saved")
 		return ()
@@ -432,8 +424,7 @@ saveToCsv <- function() {
 	lineNum <- getLineNum(lineStatus)
 
 	ncolumn <- 2
-	tab <- get("tab", envir = .GlobalEnv)
-	if(tab == 2) {
+	if(e$tab == 2) {
 		write("before,slide,after",filename,append = TRUE)
 		ncolumn <- 3
 	}
@@ -445,7 +436,7 @@ saveToCsv <- function() {
 		if(lineStatus[[j]] != "removed") {
 			selected[id, 1] <- as.integer(lineCoord[[j]][1])
 			selected[id, 2] <- as.integer(lineCoord[[j]][2])
-			if(tab == 2) {
+			if(e$tab == 2) {
 				selected[id, 3] <- as.integer(lineCoord[[j]][3])
 			}
 			id <- id + 1
@@ -456,7 +447,7 @@ saveToCsv <- function() {
 	write.table(selected, filename, sep = ",", col.names = FALSE, row.names = FALSE,append=TRUE)
 }
 
-importTpsFile <- function(tpsfile) {
+importTpsFile <- function(e, tpsfile) {
 	tpsdata <- readland.tps2(file=tpsfile, specID = "ID")
 
 	#######################################################################################
@@ -479,7 +470,7 @@ importTpsFile <- function(tpsfile) {
 	specId <- 1
 	for(i in 1:nSpecimens){
 		ratioV <- getRatio(filelist[[i]])
-
+		
 		ratio <- ratioV[1]
 		canvasW <- ratioV[2]
 		canvasH <- ratioV[3]
@@ -512,45 +503,45 @@ importTpsFile <- function(tpsfile) {
 	}
 
 	if(nSpecimens > 0) {
-		assign("activeDataList", tpsDataList, envir = .GlobalEnv)
-		assign("currImgId", 1, envir = .GlobalEnv)
-		assign("landmarkNum", nlandmarks, envir = .GlobalEnv)
-
-		tab <- get("tab", envir = .GlobalEnv)
+		e$activeDataList <- tpsDataList
+		e$currImgId <- 1
+		e$landmarkNum <- nlandmarks
+		
+		tab <- e$tab
 		if(tab == 0) {
-			digitizeInit()
-			assign("digData", tpsDataList, envir = .GlobalEnv)
-			assign("digCurrImgId", 1, envir = .GlobalEnv)
+			digitizeInit(e)
+			e$digData <- tpsDataList
+			e$digCurrImgId <- 1
 			digUpdateSpecNumber(nSpecimens)
-			digShowPicture()
+			digShowPicture(e)
 		}else if (tab == 1) {
-			linkInit()
-			assign("linkData", tpsDataList, envir = .GlobalEnv)
-			showPicture()
+			linkInit(e)
+			e$linkData <- tpsDataList		
+			showPicture(e)
 		}else if(tab == 2) {
-			sliderInit()
-			assign("sliderData", tpsDataList, envir = .GlobalEnv)
-			showPicture()
+			sliderInit(e)
+			e$sliderData <- tpsDataList		
+			showPicture(e)
 		}
 	}
 }
 
-importFile <- function(id) {
-	tab <- get("tab", envir = .GlobalEnv)
-	if(tab == 1) {
-		tpsfile <- linkFiles[id]
-	} else if(tab == 2) {
-		tpsfile <- sliderFiles[id]
+importFile <- function(e, id) {
+	if(e$tab == 1) {
+		files <- e$linkFiles	
+	} else if(e$tab == 2) {
+		files <- e$sliderFiles
 	}
-	importTpsFile(tpsfile)
+	tpsfile <- files[id]
+	importTpsFile(e, tpsfile)
 }
 
-openTpsFile <- function() {
+openTpsFile <- function(e) {
     tpsfileName <- tclvalue(tkgetOpenFile( filetypes = "{{tps file} {.tps}}"))
 
-    if (tpsfileName != "") {
-		importTpsFile(tpsfileName)
-		tab <- get("tab", envir = .GlobalEnv)
+    if (tpsfileName != "") {		
+		importTpsFile(e, tpsfileName)
+		tab <- e$tab
 		#record user opened tps file recently
 		if(tab != 0) {
 			importFileList <- ""
@@ -563,7 +554,7 @@ openTpsFile <- function() {
 				content <- scan(file = importFileList, what = "char", sep = "\n", quiet = TRUE)
 				existing <- grep(tpsfileName, content, TRUE)
 				if(length(existing) > 0) {
-					myPrint(paste(tpsfileName,"already exists, ignore it"))
+					#myPrint(paste(tpsfileName,"already exists, ignore it"))
 					return ()
 				}
 			}else {
@@ -574,9 +565,10 @@ openTpsFile <- function() {
 	}
 }
 
-getDotId <- function(x, y) {
-    tpsDataList <- get("activeDataList", envir = .GlobalEnv)
-    currImgId <- get("currImgId", envir = .GlobalEnv)
+getDotId <- function(e, x, y) {
+	#print("getDotId")
+    tpsDataList <- e$activeDataList
+    currImgId <- e$currImgId
     coords <- tpsDataList[[currImgId]][[3]]
 	statusList <- tpsDataList[[currImgId]][[5]]
 	if(length(coords)) {
