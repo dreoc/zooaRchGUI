@@ -14,15 +14,15 @@ digitizeInit <- function(e) {
 	e$zoom <- 0
 	e$digCurrImgId <- 1
 	e$digData <- list()
-	
+
 	clearScaleDot(e)
 }
 
 dotMainMenu <- function(e) {
 #print("dotMainMenu")
     topMenu <- tkmenu(e$wnd)
-    tkconfigure(e$wnd, menu = topMenu) 
-	
+    tkconfigure(e$wnd, menu = topMenu)
+
     #File Menu
     fileMenu <- tkmenu(topMenu, tearoff = FALSE)  # TOP menu
     tkadd(fileMenu, "command", label = "Create tps file",command = function() openSpecimens(e))
@@ -30,7 +30,7 @@ dotMainMenu <- function(e) {
     tkadd(fileMenu, "command", label = "Save", command = function() savetoTpsFile(e))
     tkadd(fileMenu, "command", label = "Exit", command = function() tkdestroy(e$wnd))
     tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
-	
+
 	e$dotMenuTree <- topMenu
 }
 
@@ -58,15 +58,15 @@ digCreateCtlFrame <- function(e, parent) {
 
 	e$specimenNumLabel <- ttklabel(digCtlFrame, text = "Number of Specimens: 0")
 	e$landMarkNumLabel <- ttklabel(digCtlFrame, text = "Number of Landmarks: 0")
-    
+
     e$missLandmarkVar <-tclVar("0")
     e$missLandmarkCheBtn <- ttkcheckbutton(digCtlFrame, text = "Missing Landmark",variable=e$missLandmarkVar)
-	
+
     sapply(list(setScaleBtn, setLandmarkNumBtn, e$scaleLabel, e$imgPath, zoomBtn1, zoomBtn2, fitBtn, labelLandmark, fontAdd, fontDec, e$specimenNumLabel, e$landMarkNumLabel, e$missLandmarkCheBtn), tkpack)
 	return (digCtlFrame)
 }
 
-bindDigCanvasEvent <-function(e, canvas) {   
+bindDigCanvasEvent <-function(e, canvas) {
     tkbind(canvas, "<Double-Button-1>", function(x, y) {
 	dotAdd(e, x, y)})
     tkbind(canvas, "<B1-Motion>", function(x, y) {
@@ -161,10 +161,10 @@ onFontDec <- function(e) {
 
 onFit <- function(e) {
 	#print("enter onFit")
-	
+
 	id <- e$currImgId
 	canvas <- e$activeCanvas
-	
+
 	#show image
 	tpsDataList <- e$activeDataList
 	imgFile <- tpsDataList[[id]][[1]]
@@ -177,7 +177,7 @@ onFit <- function(e) {
 	ratio <- tpsDataList[[id]][[6]]
 	canvasH <- tpsDataList[[id]][[7]][2]
 	canvasW <- tpsDataList[[id]][[7]][1]
-	
+
 	height <- as.integer(tcl('image', 'height', img))
 
 	ratio <- as.integer(height/600)
@@ -224,12 +224,12 @@ onLabelLandMark <- function(e) {
 				for(i in 1:length(statusList)){
 					#print(paste("i:", i, "status:", statusList[[i]]))
 					if(statusList[[i]] == "removed") {next}
-					label(e, id, temp[[i]][1], temp[[i]][2])			
+					label(e, id, temp[[i]][1], temp[[i]][2])
 					id <- id + 1
 				}
 			}
-		}        
-    } 
+		}
+    }
 }
 
 #show next specimen
@@ -301,7 +301,7 @@ onSetScaleOk <- function(e) {
 	#calculate scale factor
 	scaleFactor <- getPicScale(e, distance)
 	#print(paste("scale factor:",scaleFactor))
-	
+
 	#show scale factor
 	tkconfigure(e$scaleLabel, text = paste("Scale Factor: ", format(scaleFactor, digits = 5)))
 
@@ -335,7 +335,7 @@ onlandmarkNumOk <- function(e) {
 	tpsDataList <- e$activeDataList
 	e$currImgId <- 1
 	digShowPicture(e)
-	
+
 	tkdestroy(e$landmarkNumWin)
 }
 
@@ -389,9 +389,9 @@ setScale <- function(e) {
 
 	if(length(tpsDataList) == 0) {
 		alertBox("no picture open")
-	} else {		
+	} else {
 		e$scaleMode <- 1
-		createSetScaleWind(e)		
+		createSetScaleWind(e)
 	}
 }
 
@@ -443,10 +443,10 @@ savetoTpsFile <- function(e) {
     for(i in 1:length(tpsDataList)){
         # get image file list
         filelist[[length(filelist)+1]] <- tpsDataList[[i]][[1]]
-        
+
         #get scale list
         scalebar[[length(scalebar)+1]] <- tpsDataList[[i]][[2]]
-        
+
 		#get ratio
 		ratio <- tpsDataList[[i]][[6]]
 		fitImgH <- as.integer(tpsDataList[[i]][[7]][2])
@@ -480,7 +480,7 @@ savetoTpsFile <- function(e) {
     }
 
     dimnames(newdata)[[3]] <- as.list(filelist)
-    
+
     ##################################################################################
     # 7.30.2017 - EOC change: added conditional structure to avoid double ".tps" when
     # saving file
@@ -494,21 +494,31 @@ savetoTpsFile <- function(e) {
 
 # get image file
 openSpecimens <- function(e) {
-	#print("openSpecimens")
-    #############################################################
-    # 8.9.2017 EOC added "title" argument to tkgetOpenFile
-    # only GIF files are serched for until other files can be read
-    fileStr <- tclvalue(tkgetOpenFile( filetypes = "{{GIF file} {.gif}}",
-                                       multiple=TRUE, title="Select Images to Digitize"))
-    ###########################################################
+  #print("openSpecimens")
+  #############################################################
+  # 8.9.2017 EOC added "title" argument to tkgetOpenFile
+  # only GIF files are serched for until other files can be read
+  fileStr <- tclvalue(tkgetOpenFile( filetypes = "{{GIF file} {.gif}}",
+                                     multiple=TRUE, title="Select Images to Digitize"))
+  ###########################################################
 
-    ###########################################################
+  ################################################################
+  # 8.10.2017 EOC changed seems that when spaces are in file name, brackets {} are placed in output of tkgetOpenFile
+  # but when no spaces, strng is without brackets. I inserted conditional to detect whether {} are present and separate
+  # files differently when they are or not present.######
+  if (length(grep(pattern = "}",x = fileStr)) >0 ){
+    ################################################################
     # 8.9.2017 EOC changed strsplit's pattern from " " to removing
     # brackets {}, " " became a problem when filenames had spaces.
     imgList <- unlist(strsplit(fileStr, "} ",fixed = FALSE))
     imgList <- gsub(pattern = "}",replacement = "",x = imgList)
     imgList <- gsub(pattern = "\\{",replacement = "",x = imgList)
-    ###########################################################
+    ################################################################
+  } else {
+    imgList <- unlist(strsplit(fileStr, " ",fixed = FALSE))
+  }
+  ##################################################################
+
     nSpecimens <- length(imgList)
 
     if (nSpecimens != 0) {
@@ -519,25 +529,25 @@ openSpecimens <- function(e) {
 			ratio <- ratioV[1]
 			canvasW <- ratioV[2]
 			canvasH <- ratioV[3]
-			
-			if(ratio == 0) { 
+
+			if(ratio == 0) {
 				nSpecimens <- nSpecimens-1
-				next 
+				next
 			}
-		
+
 			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH))
         }
-		
+
 		if(nSpecimens > 0) {
 			#initialize
 			digitizeInit(e)
-			
+
 			e$activeDataList <- tpsDataList
-			e$digData <- tpsDataList		
+			e$digData <- tpsDataList
 			e$currImgId <- 1
 
 			digShowPicture(e)
-			
+
 			tkconfigure(e$specimenNumLabel, text = paste("Number of Specimens: ", nSpecimens))
 		}
     }
@@ -553,7 +563,7 @@ updateDotList <- function(e, x, y, operate, moveDotId = 0, status="normal") {
 		newAdded <- FALSE
 	}else {
 		newAdded <- TRUE
-	}   
+	}
 
     if (operate == "add") {
         if(dotId == 0) {
@@ -583,7 +593,7 @@ dotAdd<-function(e, x, y) {
 
     x<-as.integer(x)
     y<-as.integer(y)
-	
+
 	canvas <- e$activeCanvas
 	scaleDotNum <- e$scaleDotNum
 
@@ -613,12 +623,12 @@ dotAdd<-function(e, x, y) {
 		if (tclvalue(e$missLandmarkVar) == "1") {
 			fill <- "black"
 			outline <- "red"
-			dotStatus <- "black"			
+			dotStatus <- "black"
 			updateMissLandMark(e, 0)
 		}
 		res <- updateDotList(e, x, y, "add", status=dotStatus)
 
-		if(res) {			
+		if(res) {
 			item <- tkcreate(canvas, "oval", x - 6, y - 6, x + 6, y + 6,
 							 width=1, outline=outline,
 							 fill=fill)
@@ -639,7 +649,7 @@ updateMissLandMark <-function(e, value) {
 	e$missLandmarkVar <-tclVar(value)
 	tkconfigure(e$missLandmarkCheBtn, variable=e$missLandmarkVar)
 }
-			
+
 dotSelect<-function(e, x, y) {
 	if(!e$scaleMode) {
 		canvas <- e$activeCanvas
@@ -657,7 +667,7 @@ dotRelease <- function(e, x, y) {
 	if(length(e$activeDataList) <= 0) {
 		return ()
 	}
-	
+
 	if(!e$scaleMode) {
 		#redraw the label
 		canvas <- e$activeCanvas
@@ -677,7 +687,7 @@ dotMove <- function(e, x, y) {
 	if(length(e$activeDataList) <= 0) {
 		return ()
 	}
-	
+
 	if(!e$scaleMode) {
 		x <- as.numeric(x)
 		y <- as.numeric(y)
@@ -713,16 +723,16 @@ digRemoveDotOk <-function(e, x, y) {
 }
 
 digGetDotNum <- function(e) {
-	#check if the landmark is enough 
+	#check if the landmark is enough
 	imgId <- e$currImgId
 	tpsDataList <- e$activeDataList
-	statusList <- tpsDataList[[imgId]][[5]]	
-	
+	statusList <- tpsDataList[[imgId]][[5]]
+
 	len <- 0
 	if(length(statusList)) {
 		for(i in 1:length(statusList)) {
-			if(statusList[[i]] != "removed") {len = len+1}		
-		}	
+			if(statusList[[i]] != "removed") {len = len+1}
+		}
 	}
 	return (len)
 }

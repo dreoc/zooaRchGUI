@@ -1,8 +1,8 @@
 Package: zooaRchGUI
 Type: Package
 Title: Analytical Tools for Zooarchaeological Data
-Version: 1.0.2.08.09.2017.00.31
-Date: 2017-08-09
+Version: 1.0.2.08.10.2017.10.42
+Date: 2017-08-10
 Author: Erik Otarola-Castillo, Jesse Wolfhagen, John Brian Rapes, and Max D. Price
 Maintainer: Erik Otarola-Castillo <eoc@purdue.edu>
 Description: The analysis and inference of faunal remains recovered from archaeological sites concerns the field of zooarchaeology. The zooaRch package provides analytical tools to make inferences on zooarchaeological data. Functions in this package allow users to read, manipulate, visualize, and analyze zooarchaeological data.
