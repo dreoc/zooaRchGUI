@@ -469,16 +469,28 @@ importTpsFile <- function(e, tpsfile) {
 
 	specId <- 1
 	for(i in 1:nSpecimens){
-		ratioV <- getRatio(filelist[[i]])
 		
+		speciName <- filelist[[i]]
+		if(!file.exists(speciName)) {
+			nSpecimens <- nSpecimens-1
+			print(paste(speciName, "doesn't exist. Ignore it!!"))
+			next
+		}
+		
+		ext <- file_ext(speciName)
+		if((ext != "gif") && (ext != "GIF")) {
+			speciName <- findPPM(filelist[[i]])
+		}
+		
+		ratioV <- getRatio(speciName)		
 		ratio <- ratioV[1]
 		canvasW <- ratioV[2]
 		canvasH <- ratioV[3]
-		#print(paste("ratio", ratio, "canvas h", canvasH, "canvas w", canvasW))
 		if(ratio == 0) {
 			nSpecimens <- nSpecimens-1
 			next
 		}
+		#print(paste("ratio", ratio, "canvas h", canvasH, "canvas w", canvasW))
 
 		tpsDataList[[specId]] <- list(filelist[[i]], inscale[i], list(), "inches", list(), ratio, c(canvasW, canvasH), list(), list())
 
@@ -512,7 +524,7 @@ importTpsFile <- function(e, tpsfile) {
 			digitizeInit(e)
 			e$digData <- tpsDataList
 			e$digCurrImgId <- 1
-			digUpdateSpecNumber(nSpecimens)
+			digUpdateSpecNumber(e, nSpecimens)
 			digShowPicture(e)
 		}else if (tab == 1) {
 			linkInit(e)

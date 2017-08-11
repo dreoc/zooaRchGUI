@@ -80,8 +80,23 @@ bindDigCanvasEvent <-function(e, canvas) {
 }
 
 digUpdateSpecNumber <-function(e, num) {
-	#print("digUpdateSpecNumber")
+	print("digUpdateSpecNumber")
 	tkconfigure(e$specimenNumLabel, text = paste("Number of Specimens: ", num))
+}
+
+findPPM <- function(srcDir) {
+	res <- ""
+	if(file.exists(srcDir)) {
+		fileName <- file_path_sans_ext(basename(srcDir)) 
+		destDir <- paste(tempdir(), "\\", fileName, ".ppm", sep="")
+		if(!file.exists(destDir)) {
+			ffmpeg <- paste("\"", system.file(package="zooaRchGUI", "bin", "x86", "ffmpeg.exe"), "\"", sep="")
+			info <- system(paste(ffmpeg, "-i", srcDir, destDir, sep=" "), show.output.on.console = FALSE)	
+		}
+		
+		res <- destDir
+	}
+	return (res)
 }
 
 digShowPicture <- function(e) {
@@ -160,18 +175,28 @@ onFontDec <- function(e) {
 }
 
 onFit <- function(e) {
-	#print("enter onFit")
-
 	id <- e$currImgId
 	canvas <- e$activeCanvas
+	tkdelete(canvas, "all")
 
 	#show image
 	tpsDataList <- e$activeDataList
-	imgFile <- tpsDataList[[id]][[1]]
+	speciName <- tpsDataList[[id]][[1]]
+	
+	if(!file.exists(speciName)) {
+		print(paste(speciName, "doesn't exist"))
+		return ()
+	}
+	
+	ext <- file_ext(speciName)
+	if((ext != "gif") && (ext != "GIF")) {
+		speciName <- findPPM(speciName)
+	}
+	
 	zoomImg <- tclVar()
 	tcl('image', 'create', 'photo', zoomImg)
     img <- tclVar()
-    tcl('image', 'create', 'photo', img, file=imgFile)
+    tcl('image', 'create', 'photo', img, file=speciName)
 
 	#get ratio
 	ratio <- tpsDataList[[id]][[6]]
@@ -190,7 +215,6 @@ onFit <- function(e) {
 	#print(paste("id:", id, "height:", height, "width:", "NA", "ratio:", ratio, "canvasH:", canvasH, "canvasW:", canvasW))
 	tkconfigure(canvas, width=canvasW, height=canvasH)
 	tkcreate(canvas, "image", as.integer(canvasW)/2, as.integer(canvasH)/2, image=zoomImg)
-	#assign("digData", tpsDataList, envir = .GlobalEnv)
 
 	#reset zoom level
 	e$fitImage <- zoomImg
@@ -498,7 +522,7 @@ openSpecimens <- function(e) {
   #############################################################
   # 8.9.2017 EOC added "title" argument to tkgetOpenFile
   # only GIF files are serched for until other files can be read
-  fileStr <- tclvalue(tkgetOpenFile( filetypes = "{{GIF file} {.gif}}",
+  fileStr <- tclvalue(tkgetOpenFile( filetypes = "{{image file} {.bmp .jpg .png .gif}}",
                                      multiple=TRUE, title="Select Images to Digitize"))
   ###########################################################
 
@@ -518,14 +542,26 @@ openSpecimens <- function(e) {
     imgList <- unlist(strsplit(fileStr, " ",fixed = FALSE))
   }
   ##################################################################
-
     nSpecimens <- length(imgList)
 
     if (nSpecimens != 0) {
 		#initialize tpsDataList
         tpsDataList <- list()
         for(i in 1:length(imgList)){
-			ratioV <- getRatio(imgList[[i]])
+		
+			speciName <- imgList[[i]]
+			if(!file.exists(speciName)) {
+				nSpecimens <- nSpecimens-1
+				print(paste("Error:", speciName, "doesn't exist. Ignore it!!"))
+				next
+			}
+						
+			ext <- file_ext(speciName)
+			if((ext != "gif") && (ext != "GIF")) {
+				speciName <- findPPM(imgList[[i]])
+			}
+
+			ratioV <- getRatio(speciName)
 			ratio <- ratioV[1]
 			canvasW <- ratioV[2]
 			canvasH <- ratioV[3]
