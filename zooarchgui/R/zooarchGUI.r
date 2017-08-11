@@ -68,6 +68,9 @@ NULL
 #' @import tkrplot
 NULL
 
+#' @import tools # 8.11.2017 - EOC - needed to import tools package into namesapce, description file and here, to use file_ext() function
+NULL
+
 #' @import utils
 NULL
 

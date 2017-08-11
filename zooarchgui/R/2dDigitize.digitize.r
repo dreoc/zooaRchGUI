@@ -87,13 +87,13 @@ digUpdateSpecNumber <-function(e, num) {
 findPPM <- function(srcDir) {
 	res <- ""
 	if(file.exists(srcDir)) {
-		fileName <- file_path_sans_ext(basename(srcDir)) 
+		fileName <- file_path_sans_ext(basename(srcDir))
 		destDir <- paste(tempdir(), "\\", fileName, ".ppm", sep="")
 		if(!file.exists(destDir)) {
 			ffmpeg <- paste("\"", system.file(package="zooaRchGUI", "bin", "x86", "ffmpeg.exe"), "\"", sep="")
-			info <- system(paste(ffmpeg, "-i", srcDir, destDir, sep=" "), show.output.on.console = FALSE)	
+			info <- system(paste(ffmpeg, "-i", srcDir, destDir, sep=" "), show.output.on.console = FALSE)
 		}
-		
+
 		res <- destDir
 	}
 	return (res)
@@ -182,17 +182,17 @@ onFit <- function(e) {
 	#show image
 	tpsDataList <- e$activeDataList
 	speciName <- tpsDataList[[id]][[1]]
-	
+
 	if(!file.exists(speciName)) {
 		print(paste(speciName, "doesn't exist"))
 		return ()
 	}
-	
+
 	ext <- file_ext(speciName)
 	if((ext != "gif") && (ext != "GIF")) {
 		speciName <- findPPM(speciName)
 	}
-	
+
 	zoomImg <- tclVar()
 	tcl('image', 'create', 'photo', zoomImg)
     img <- tclVar()
@@ -548,30 +548,30 @@ openSpecimens <- function(e) {
 		#initialize tpsDataList
         tpsDataList <- list()
         for(i in 1:length(imgList)){
-		
-			speciName <- imgList[[i]]
-			if(!file.exists(speciName)) {
-				nSpecimens <- nSpecimens-1
-				print(paste("Error:", speciName, "doesn't exist. Ignore it!!"))
-				next
-			}
-						
-			ext <- file_ext(speciName)
-			if((ext != "gif") && (ext != "GIF")) {
-				speciName <- findPPM(imgList[[i]])
-			}
 
-			ratioV <- getRatio(speciName)
-			ratio <- ratioV[1]
-			canvasW <- ratioV[2]
-			canvasH <- ratioV[3]
+    			speciName <- imgList[[i]]
+    			if(!file.exists(speciName)) {
+    				nSpecimens <- nSpecimens-1
+    				print(paste("Error:", speciName, "doesn't exist. Ignore it!!"))
+    				next
+    			}
 
-			if(ratio == 0) {
-				nSpecimens <- nSpecimens-1
-				next
-			}
+    			ext <- file_ext(speciName)
+    			if((ext != "gif") && (ext != "GIF")) {
+    				speciName <- findPPM(imgList[[i]])
+    			}
 
-			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH))
+    			ratioV <- getRatio(speciName)
+    			ratio <- ratioV[1]
+    			canvasW <- ratioV[2]
+    			canvasH <- ratioV[3]
+
+    			if(ratio == 0) {
+    				nSpecimens <- nSpecimens-1
+    				next
+    			}
+
+    			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH))
         }
 
 		if(nSpecimens > 0) {
