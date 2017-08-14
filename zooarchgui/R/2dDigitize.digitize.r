@@ -118,7 +118,8 @@ downloadFfmpeg <- function(win) {
 	ffmpeg <- file.path(tempdir(), file.name.from.url(url))
 	download.file(url, destfile=ffmpeg, mode = 'wb')
 
-	binDir<-system.file(package="zooaRchGUI", "bin")
+	binDir <- file.path(system.file(package="zooaRchGUI"), "bin")
+	dir.create(binDir)
 	unzip(ffmpeg, exdir=binDir)
 	#alertBox("Download succeedd. Please continue your operation.")
 }
