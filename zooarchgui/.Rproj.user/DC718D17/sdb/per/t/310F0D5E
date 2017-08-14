@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "filelist<-list.files(\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooarchGUI_beta\\\\testfolder\\\\\")\ntarname<-filelist[grep(pattern = \".tar.gz\",x = filelist)]\ntarname\ntarpath<-paste(\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooarchGUI_beta\\\\testfolder\\\\\",tarname,sep=\"\")\ninstall.packages(tarpath, repos = NULL, type = \"source\",lib = .libPaths())\n#install.packages(\"zooaRchGUI\", type=\"source\")\nlibrary(zooaRchGUI)\nhelp(package = \"zooaRchGUI\")\nrm(list=ls())\n#runtheGUI\nzooaRch_GUI()\n# read in the mockfile dataset\n#data(\"myData\")\n#data(\"LRBdata\")\n#Grayson <- data.frame(Species = 1:26, Frequency = c(230,142,140,76,19,10,8,8,7,6,5,5,5,5,4,4,3,3,3,2,2,2,1,1,1,1))\n#marjRab_Labels <-data.frame(labels=c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'))\n#data(marjRab)\n#marjRab_models<-data.frame(model=c(1,2,3))\n#data(speth83)\n#speth_labels <-data.frame(labels=c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13))\n#speth_models<-data.frame(model=c(4,5))\n#data(\"ClarksonLimbLoc\") # for chi square and fisher's exact tests\n#head(ClarksonLimbLoc)\n#source(\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooarchGUI_beta\\\\testfolder\\\\zooarchgui_beta.R\")\n\n#library(devtools); install_github(\"zooarchGUI/zooaRchGUI\", dependencies=TRUE); library(zooaRchGUI); help(package = \"zooaRchGUI\"); zooaRch_GUI()\n\n#dfs.fun<-function()c(unlist(lapply(ls(envir = .GlobalEnv), function(dfs) if (class(get(dfs))[1] == \"data.frame\") c(unlist(dfs)))),\"Load User File\")\n#dfs.fun()\n#class(get(ls()))\n#as.name(ls(envir = .GlobalEnv))\n\n",
+    "created" : 1502142361180.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "661748868",
+    "id" : "310F0D5E",
+    "lastKnownWriteTime" : 1495737110,
+    "last_content_update" : 1495737110,
+    "path" : "E:/Dropbox (LCA)/Documents/Research/zoaRch_project/zooarchGUI_beta/testfolder/InstallandRun_local_zooarchGUItarball.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

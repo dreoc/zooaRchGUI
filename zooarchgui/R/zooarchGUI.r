@@ -29,6 +29,9 @@ NULL
 #' @import grDevices
 NULL
 
+#' @import installr
+NULL
+
 #' @import MASS
 NULL
 

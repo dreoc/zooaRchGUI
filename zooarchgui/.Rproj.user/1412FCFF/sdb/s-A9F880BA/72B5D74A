@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "e <- new.env()\n\ne$okLabel <- \"ok\"\ne$cancelLabel <- \"cancel\"\n\ne$wnd <- tktoplevel()\n#tkwm.geometry(e$wnd, \"300x300+300+300\")\nframe <- ttkframe(e$wnd, padding = c(3,3,12,12))\ntkpack(frame, expand = TRUE, fill = \"both\")\ne$layout <- ttklabelframe(frame, padding = 10)\ntkpack(e$layout, expand = TRUE, fill = \"both\", padx = 5, pady = 5)\nif (comboNum > 0) {\n  comboxLayout(e, comboNum, dir)\n}\n\nlayout(e);\n\n#Draw OK Cancel Button\nbutton_frame <- ttkframe(frame)\ncancel_button <- ttkbutton(button_frame, text = e$cancelLabel, command=function() tkdestroy(e$wnd))\nok_button <- ttkbutton(button_frame, text = e$okLabel, command=function() run(e))\ntkpack(button_frame, fill = \"x\", padx = 5, pady = 5)\ntkpack(ttklabel(button_frame, text = \" \"), expand = TRUE, fill = \"y\", side = \"left\")\nsapply(list(cancel_button, ok_button), tkpack, side = \"left\", padx = 6)\ntkbind(\"TButton\", \"<Return>\", function(W) tcl(W, \"invoke\"))\ntkfocus(e$wnd)\n",
+    "created" : 1502474170865.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2917049736",
+    "id" : "72B5D74A",
+    "lastKnownWriteTime" : 1502656440,
+    "last_content_update" : 1502656440125,
+    "path" : "E:/Dropbox (LCA)/Documents/Research/zoaRch_project/zooaRchGUI_v1/admin/testfunctions.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "dat<-read.csv(\"C:\\\\Users\\\\eotarola\\\\Desktop\\\\Components Query1.csv\")\ndat<-dat[-which(dat$Latitude==9999),]\ndat<-dat[-which(dat$Longitude==0),]\ndat$Longitude[dat$Longitude>0]<-(-dat$Longitude[dat$Longitude>0])\nplot(dat$Longitude,dat$Latitude)\nbisondat<-dat[which(dat$Bison.bone.==T),]\nbisondat<-bisondat[-grep(pattern = \"999\",x = bisondat$BisonNISP),]\nbisondat<-bisondat[-which(bisondat$BisonNISP>30000),]\nplot(bisondat$Latitude,bisondat$BisonNISP)\n",
+    "created" : 1502166574741.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "32634693",
+    "id" : "B0C501C1",
+    "lastKnownWriteTime" : 1502208695,
+    "last_content_update" : 1502208695740,
+    "path" : "C:/Users/eotarola/Desktop/prlimcode_sumr_data.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

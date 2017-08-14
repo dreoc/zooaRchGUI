@@ -89,7 +89,7 @@ findPPM <- function(srcDir) {
 		fileName <- file_path_sans_ext(basename(srcDir))
 		destDir <- paste(tempdir(), "\\", fileName, ".ppm", sep="")
 		if(!file.exists(destDir)) {
-			ffmpeg <- paste("\"", system.file(package="zooaRchGUI", "bin", "ffmpeg-3.2-win32-static", "bin", "ffmpeg.exe"), "\"", sep="")			
+			ffmpeg <- paste("\"", system.file(package="zooaRchGUI", "bin", "ffmpeg-3.2-win32-static", "bin", "ffmpeg.exe"), "\"", sep="")
 			info <- system(paste(ffmpeg, "-i", srcDir, destDir, sep=" "), show.output.on.console = FALSE)
 		}
 
@@ -101,9 +101,9 @@ findPPM <- function(srcDir) {
 checkFfmpeg <- function() {
 	win <- tktoplevel(height=100, width=180)
 	tkwm.title(win, "Download ffmpeg")
-	label1 = tklabel(win, text="Non-gif image is not supported by default")
-	label2 = tklabel(win, text="Do you want to install the third-party ffmpeg tool for other images?")
-	label3 = tklabel(win, text="After installation completed, please recreat tps file")
+	label1 = tklabel(win, text="Non-GIF images are not supported by default.")
+	label2 = tklabel(win, text="Do you want to install the third-party ffmpeg tool to import other image formats?")
+	label3 = tklabel(win, text="After installation is complete, please recreate .tps file.")
 	sapply(list(label1, label2, label3), tkpack, padx = 6)
 	btnFrame <- ttkframe(win)
 	tkpack(btnFrame, padx = 6, pady = 16)
@@ -112,7 +112,7 @@ checkFfmpeg <- function() {
 	sapply(list(cancelBtn, okBtn), tkpack, padx = 6, side = "left")
 }
 
-downloadFfmpeg <- function(win) { 
+downloadFfmpeg <- function(win) {
 	tkdestroy(win)
 	url<- "http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.2-win32-static.zip"
 	ffmpeg <- file.path(tempdir(), file.name.from.url(url))
@@ -121,7 +121,7 @@ downloadFfmpeg <- function(win) {
 	binDir <- file.path(system.file(package="zooaRchGUI"), "bin")
 	dir.create(binDir)
 	unzip(ffmpeg, exdir=binDir)
-	#alertBox("Download succeedd. Please continue your operation.")
+	#alertBox("Download succeeded. Please continue your operation.")
 }
 
 digShowPicture <- function(e) {
@@ -588,7 +588,7 @@ openSpecimens <- function(e) {
 						checkFfmpeg()
 						return ()
 					}
-					
+
     				speciName <- findPPM(imgList[[i]])
     			}
 
@@ -605,7 +605,7 @@ openSpecimens <- function(e) {
 
     			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH, imgW, imgH))
         }
-		
+
 		if(nSpecimens > 0) {
 			#initialize
 			digitizeInit(e)

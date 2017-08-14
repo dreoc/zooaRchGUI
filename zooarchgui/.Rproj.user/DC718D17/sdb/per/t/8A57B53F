@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "a<-seq(.001, .99, length.out=1000)\nb<-dgamma(a,1, .5)\nplot(a,b)\n\n\ng<-sort(c(rep(0:20, seq(1000,1, length.out=21)),runif(100,0,100)))/100\n\nlibrary(fitdistrplus)\na<-fitdist(g,\"exp\")\nsummary(a)\nb<-dexp(g,a$estimate)\n\nhist(g, freq=F, ylim=range(b))\nlines(g,b,col=\"red\")\n\n\na<-fitdist(g/100,\"beta\")\nsummary(a)\nb<-dexp(g/100,a$estimate)\n\nhist(g/100, freq=F, ylim=range(b))\nlines(g/100,b,col=\"red\")\n",
+    "created" : 1502382771945.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3005030863",
+    "id" : "8A57B53F",
+    "lastKnownWriteTime" : 1502389602,
+    "last_content_update" : 1502389602281,
+    "path" : "C:/Users/localadmin/Desktop/code for distfit.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
