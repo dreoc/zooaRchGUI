@@ -80,7 +80,6 @@ bindDigCanvasEvent <-function(e, canvas) {
 }
 
 digUpdateSpecNumber <-function(e, num) {
-	print("digUpdateSpecNumber")
 	tkconfigure(e$specimenNumLabel, text = paste("Number of Specimens: ", num))
 }
 
@@ -90,7 +89,7 @@ findPPM <- function(srcDir) {
 		fileName <- file_path_sans_ext(basename(srcDir))
 		destDir <- paste(tempdir(), "\\", fileName, ".ppm", sep="")
 		if(!file.exists(destDir)) {
-			ffmpeg <- paste("\"", system.file(package="zooaRchGUI", "bin", "x86", "ffmpeg.exe"), "\"", sep="")
+			ffmpeg <- paste("\"", system.file(package="zooaRchGUI", "bin", "ffmpeg-3.2-win32-static", "bin", "ffmpeg.exe"), "\"", sep="")			
 			info <- system(paste(ffmpeg, "-i", srcDir, destDir, sep=" "), show.output.on.console = FALSE)
 		}
 
@@ -99,8 +98,33 @@ findPPM <- function(srcDir) {
 	return (res)
 }
 
+checkFfmpeg <- function() {
+	win <- tktoplevel(height=100, width=180)
+	tkwm.title(win, "Download ffmpeg")
+	label1 = tklabel(win, text="Non-gif image is not supported by default")
+	label2 = tklabel(win, text="Do you want to install the third-party ffmpeg tool for other images?")
+	label3 = tklabel(win, text="After installation completed, please recreat tps file")
+	sapply(list(label1, label2, label3), tkpack, padx = 6)
+	btnFrame <- ttkframe(win)
+	tkpack(btnFrame, padx = 6, pady = 16)
+	okBtn <- ttkbutton(btnFrame, text = "OK", command = function() downloadFfmpeg(win))
+	cancelBtn <- ttkbutton(btnFrame, text = "Cancel", command = function() tkdestroy(win))
+	sapply(list(cancelBtn, okBtn), tkpack, padx = 6, side = "left")
+}
+
+downloadFfmpeg <- function(win) { 
+	tkdestroy(win)
+	url<- "http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-3.2-win32-static.zip"
+	ffmpeg <- file.path(tempdir(), file.name.from.url(url))
+	download.file(url, destfile=ffmpeg, mode = 'wb')
+
+	binDir<-system.file(package="zooaRchGUI", "bin")
+	unzip(ffmpeg, exdir=binDir)
+	#alertBox("Download succeedd. Please continue your operation.")
+}
+
 digShowPicture <- function(e) {
-#print("digShowPicture")
+	#print("digShowPicture")
 	onFit(e)
 	tpsDataList <- e$activeDataList
 	imgId <- e$currImgId
@@ -184,7 +208,7 @@ onFit <- function(e) {
 	speciName <- tpsDataList[[id]][[1]]
 
 	if(!file.exists(speciName)) {
-		print(paste(speciName, "doesn't exist"))
+		print(paste(speciName, "doesn't exist. Ignore it!!"))
 		return ()
 	}
 
@@ -474,7 +498,10 @@ savetoTpsFile <- function(e) {
 		#get ratio
 		ratio <- tpsDataList[[i]][[6]]
 		fitImgH <- as.integer(tpsDataList[[i]][[7]][2])
-		#print(paste("i:", i, " ratio: ", ratio, " fitImgH: ", fitImgH))
+		imgW <- as.integer(tpsDataList[[i]][[7]][3])
+		imgH <- as.integer(tpsDataList[[i]][[7]][4])
+		attrs <- c(imgW, imgH)
+		#print(paste("i:", i, " ratio: ", ratio, " fitImgH: ", fitImgH, "imgW", imgW, "imgH", imgH))
 
         #construct landmark matrix
 		coordi <- tpsDataList[[i]][[3]]
@@ -498,8 +525,6 @@ savetoTpsFile <- function(e) {
 
 			j <- j+1
         }
-        #print("landmark: ")
-        #print(selected)
         newdata[, , i] <- selected
     }
 
@@ -509,9 +534,9 @@ savetoTpsFile <- function(e) {
     # 7.30.2017 - EOC change: added conditional structure to avoid double ".tps" when
     # saving file
     if (length(grep(".tps",x = filename)) > 0 ) {
-      writeland.tps(newdata, filename, scalebar)
+      writeland.tps(newdata, filename, scalebar, attrs)
     } else {
-      writeland.tps(newdata, paste(filename,".tps", sep = ""), scalebar)
+      writeland.tps(newdata, paste(filename,".tps", sep = ""), scalebar, attrs)
       }
     ##################################################################################
 }
@@ -552,28 +577,34 @@ openSpecimens <- function(e) {
     			speciName <- imgList[[i]]
     			if(!file.exists(speciName)) {
     				nSpecimens <- nSpecimens-1
-    				print(paste("Error:", speciName, "doesn't exist. Ignore it!!"))
+    				print(paste(speciName, "doesn't exist. Ignore it!!"))
     				next
     			}
 
     			ext <- file_ext(speciName)
     			if((ext != "gif") && (ext != "GIF")) {
+					if(!file.exists(system.file(package="zooaRchGUI", "bin", "ffmpeg-3.2-win32-static", "bin", "ffmpeg.exe"))) {
+						checkFfmpeg()
+						return ()
+					}
+					
     				speciName <- findPPM(imgList[[i]])
     			}
 
-    			ratioV <- getRatio(speciName)
+    			ratioV <- getRatio(specimen = speciName)
     			ratio <- ratioV[1]
     			canvasW <- ratioV[2]
     			canvasH <- ratioV[3]
-
+				imgW <- ratioV[4]
+    			imgH <- ratioV[5]
     			if(ratio == 0) {
     				nSpecimens <- nSpecimens-1
     				next
     			}
 
-    			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH))
+    			tpsDataList[[length(tpsDataList)+1]] <- list(imgList[[i]], 0, list(), "inches", list(), ratio, c(canvasW, canvasH, imgW, imgH))
         }
-
+		
 		if(nSpecimens > 0) {
 			#initialize
 			digitizeInit(e)
@@ -583,7 +614,6 @@ openSpecimens <- function(e) {
 			e$currImgId <- 1
 
 			digShowPicture(e)
-
 			tkconfigure(e$specimenNumLabel, text = paste("Number of Specimens: ", nSpecimens))
 		}
     }

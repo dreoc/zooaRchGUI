@@ -1,17 +1,23 @@
 
 isDebug <- 0
 ################# main data structure ##############################
-#tpsDataList
+#2d digitize/link/slider
 #tpsDataList[imgId][[1]]: specimen image dir
 #tpsDataList[imgId][[2]]: scale factor
 #tpsDataList[imgId][[3]]: landmarks
 #tpsDataList[imgId][[4]]: sclae units
 #tpsDataList[imgId][[5]]: landmark status ('normal', 'black', 'removed')
 #tpsDataList[imgId][[6]]: ratio
-#tpsDataList[imgId][[7]]: fitImgH
+#tpsDataList[imgId][[7]]: c(fitImgW, fitImgH, imgW, imgH)
+
+#link
 #tpsDataList[imgId][[8]]: link line coordinates list(c(dot1, dot2, line))
-#tpsDataList[1][[8]]: slider line coordinates list(c(dot1, dot2, dot3, line1, line2))
 #tpsDataList[1][[9]]: line status ('normal', 'removed')
+
+#slider
+#tpsDataList[imgId][[8]]: slider line coordinates list(c(dot1, dot2, dot3, line1, line2))
+#tpsDataList[1][[9]]: line status ('normal', 'removed')
+
 
 switchTab <- function(e, W, x, y) {
 	id <- tcl(W, "identify", "tab", x, y)
@@ -291,34 +297,38 @@ showDots <- function(e) {
     }
 }
 
-getRatio <- function(imgFile) {
+getRatio <- function(specimen=NULL, attrs=NULL) {
 	#print("getRatio")
 	ratio <- 0
-	if(file.exists(imgFile)) {
-		img <- tclVar()
-		tcl('image', 'create', 'photo', img, file=imgFile)
-		height <- as.integer(tcl('image', 'height', img))
-		width <- as.integer(tcl('image', 'width', img))
-
-		if(height/600 > 1) {
-			ratio <- as.integer(height/600)
-			fitCanvasH <- height/ratio
-			fitCanvasW <- width/ratio
-		}else {
-			ratio <- as.integer(600/height)
-			#zoom
-			fitCanvasH <- height*ratio
-			fitCanvasW <- width*ratio
-			ratio <- 1/ratio
+	if(!is.null(specimen)) {
+		if(!file.exists(specimen)) {
+			print(paste("File does not exists:", specimen, "Ignore it!!"))
+			return (c(0, 0, 0))
 		}
-		#print(paste(imgFile, "height:", height, "width:", width, "ratio:", ratio, "fitCanvasH:", fitCanvasH, "fitCanvasW:", fitCanvasW))
-	} else {
-		print(paste("File does not exists:", imgFile))
-		print("Ignore it!!")
-		return (c(0, 0, 0))
+		
+		img <- tclVar()
+		tcl('image', 'create', 'photo', img, file=specimen)
+		height <- as.integer(tcl('image', 'height', img))
+		width <- as.integer(tcl('image', 'width', img))	
+	} else if(!is.null(attrs)) {
+		width <- attrs[1]
+		height <- attrs[2]	
 	}
 
-	return (c(ratio, fitCanvasW, fitCanvasH))
+	if(height/600 > 1) {
+		ratio <- as.integer(height/600)
+		fitCanvasH <- height/ratio
+		fitCanvasW <- width/ratio
+	}else {
+		ratio <- as.integer(600/height)
+		#zoom
+		fitCanvasH <- height*ratio
+		fitCanvasW <- width*ratio
+		ratio <- 1/ratio
+	}
+	#print(paste(imgFile, "height:", height, "width:", width, "ratio:", ratio, "fitCanvasH:", fitCanvasH, "fitCanvasW:", fitCanvasW))
+
+	return (c(ratio, fitCanvasW, fitCanvasH, width, height))
 }
 
 showPicture <- function(e) {
@@ -461,6 +471,7 @@ importTpsFile <- function(e, tpsfile) {
 
 	olddat <- tpsdata$coords
 	inscale <- tpsdata$scale
+	attrs <- tpsdata$attrs
 
 	filelist <- dimnames(olddat)[[3]]
 	nSpecimens <- dim(olddat)[3]
@@ -468,23 +479,31 @@ importTpsFile <- function(e, tpsfile) {
 	tpsDataList <- list()
 
 	specId <- 1
-	for(i in 1:nSpecimens){
-		
-		speciName <- filelist[[i]]
-		if(!file.exists(speciName)) {
-			nSpecimens <- nSpecimens-1
-			print(paste(speciName, "doesn't exist. Ignore it!!"))
-			next
+	for(i in 1:nSpecimens){	
+		if(length(attrs) > 0) {
+			ratioV <- getRatio(attrs=attrs[[i]])	
+		}else {
+			speciName <- filelist[[i]]
+			
+			if(!file.exists(speciName)) {
+				nSpecimens <- nSpecimens-1
+				print(paste(speciName, "doesn't exist. Ignore it!!"))
+				next
+			}
+
+			ext <- file_ext(speciName)
+			if((ext != "gif") && (ext != "GIF")) {
+				if(!file.exists(system.file(package="zooaRchGUI", "bin", "ffmpeg-3.2-win32-static", "bin", "ffmpeg.exe"))) {
+					checkFfmpeg()
+					return ()
+				}				
+				speciName <- findPPM(filelist[[i]])
+			}
+
+			ratioV <- getRatio(specimen = speciName)		
 		}
-		
-		ext <- file_ext(speciName)
-		if((ext != "gif") && (ext != "GIF")) {
-			speciName <- findPPM(filelist[[i]])
-		}
-		
-		ratioV <- getRatio(speciName)		
+			
 		ratio <- ratioV[1]
-		canvasW <- ratioV[2]
 		canvasH <- ratioV[3]
 		if(ratio == 0) {
 			nSpecimens <- nSpecimens-1
@@ -492,7 +511,7 @@ importTpsFile <- function(e, tpsfile) {
 		}
 		#print(paste("ratio", ratio, "canvas h", canvasH, "canvas w", canvasW))
 
-		tpsDataList[[specId]] <- list(filelist[[i]], inscale[i], list(), "inches", list(), ratio, c(canvasW, canvasH), list(), list())
+		tpsDataList[[specId]] <- list(filelist[[i]], inscale[i], list(), "inches", list(), ratio, c(ratioV[2], ratioV[3], ratioV[4], ratioV[5]), list(), list())
 
 		coords <- olddat[, , i]
 		temp <- list()
@@ -502,7 +521,6 @@ importTpsFile <- function(e, tpsfile) {
 			if(!is.na(coords[j, 1])) {
 				temp[[j]] <- c(as.numeric(coords[j, 1])/ratio, canvasH-as.numeric(coords[j, 2])/ratio)
 				statusList[[j]] <- "normal"
-
 			}else {
 				temp[[j]] <- c(-1, -1)
 				statusList[[j]] <- "black"
@@ -596,7 +614,7 @@ getDotId <- function(e, x, y) {
 	return (0)
 }
 
-writeland.tps<-function(A, file, scale = NULL, specID = TRUE, imgPath = TRUE){
+writeland.tps<-function(A, file, scale = NULL, attrs = NULL, specID = TRUE, imgPath = TRUE){
   n<-dim(A)[3]
   k<-dim(A)[2]
   p<-dim(A)[1]
@@ -606,9 +624,17 @@ writeland.tps<-function(A, file, scale = NULL, specID = TRUE, imgPath = TRUE){
   if(!is.null(scale)){
     scaleline<-paste("SCALE", "=", scale, sep="")
   }
+  
   for(i in 1:n){
     write(lmline,file,append = TRUE)
     write.table(A[,,i],file,col.names = FALSE, row.names = FALSE,append=TRUE)
+	if(!is.null(attrs)){
+      width <- paste("WIDTH=", attrs[1],sep="")
+	  height <- paste("HEIGHT=", attrs[2],sep="")
+      write(width,file,append = TRUE)
+	  write(height,file,append = TRUE)
+    }
+	
 	if(imgPath==TRUE){
       if(is.null(dimnames(A)[[3]])) dimnames(A)[[3]] <- c(1:dim(A)[3])
       imgPathLine<-paste("IMAGE=",dimnames(A)[[3]][i],sep="")
@@ -682,12 +708,22 @@ readland.tps2 <- function (file, specID = c("None", "ID", "imageID"))
     }
   }
   if (specID == "ID") {
-    ID <- sub("ID=", "", tpsfile[grep("ID", tpsfile, ignore.case)], ignore.case)
+    ID <- sub("ID=", "", tpsfile[grep("ID=", tpsfile, ignore.case)], ignore.case)
     if (length(ID) != 0) {
       dimnames(coords)[[3]] <- as.list(ID)
     }
   }
-  return(list(coords = coords,scale=imscale)  )
+  
+    width <- sub("WIDTH=", "", tpsfile[grep("WIDTH=", tpsfile, ignore.case)], ignore.case)
+	height <- sub("HEIGHT=", "", tpsfile[grep("HEIGHT=", tpsfile, ignore.case)], ignore.case)
+	attrs <- list()
+	if((length(width) > 0) && (length(width) == length(height))) {
+	    for(i in 1: length(width)) {
+			attrs[[i]] <- c(as.integer(width[[i]]), as.integer(height[[i]]))
+		}	
+	}
+  
+  return(list(coords = coords,scale=imscale, attrs = attrs)  )
 }
 
 myPrint <- function(content) {
