@@ -35,7 +35,7 @@ NULL
 #' @import MASS
 NULL
 
-#' @import parallel
+#' @import parallel file.name.from.url
 NULL
 
 #' @import pgirmess
