@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "#detach(\"package:zooaRchGUI\")\n#remove.packages(\"zooaRchGUI\")\nlibrary(\"devtools\")\nlibrary(\"roxygen2\")\n## Assemble Man files\nrm(list=ls())\n\nfilist<-list.files(c(\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooaRchGUI_v1\\\\\",\n                     \"E:\\\\Dropbox (LCA)\\\\Documents\\\\bitbucket\\\\\"),\n                     full.names=TRUE)\ndeltar<-filist[grep(\".tar.gz\",x=filist)]\nfile.remove(deltar)\n\nlines<-readLines(\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooaRchGUI_v1\\\\DESCRIPTION\")\nlines[4]<-paste(\"Version: 1.0.3.\",format(Sys.time(), \"%m.%d.%Y.%H.%M\"),sep=\"\")\nlines[5]<-paste(\"Date: \",Sys.Date(),sep=\"\")\nwriteLines(lines,\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooaRchGUI_v1\\\\DESCRIPTION\")\nfile.copy(from=\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooaRchGUI_v1\\\\DESCRIPTION\"\n          , to = \"E:\\\\Dropbox (LCA)\\\\Documents\\\\bitbucket\\\\zooarchgui\\\\DESCRIPTION\"\n          , overwrite = TRUE)\n\n\n#devtools::check(pkg = \"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooaRchGUI_v1\\\\zooaRchGUI_1.0.2.08.11.2017.14.28.tar.gz\",\n#               check_dir=\"E:\\\\Dropbox (LCA)\\\\Documents\\\\Research\\\\zoaRch_project\\\\zooaRchGUI_v1\",\n#               document=T,cleanup=FALSE, cran=T)\n",
+    "created" : 1503171443727.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "4277187169",
+    "id" : "193E6ADF",
+    "lastKnownWriteTime" : 1503171872,
+    "last_content_update" : 1503171872569,
+    "path" : "E:/Dropbox (LCA)/Documents/Research/zoaRch_project/zooaRchGUI_v1/admin/descriptionfile.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

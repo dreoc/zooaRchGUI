@@ -623,19 +623,21 @@ run.bartletts<-function(e){
     varValue2 <- get(varName2,e$dataFrame,inherits=TRUE)
     assign("varValue2", varValue2, envir = e)
 
-    out<-bartlett.test(list(x=varValue1, x2=varValue2))
+    yvars<-c(e$varValue1)
+    factor<-as.factor(varValue2)
+    a<-paste("bartlett.test(", "yvars", " ~ ", "factor",")",sep = "")
+    out<-eval(parse(text = a))
     out$data.name<-paste(varName1, "and", varName2)
     pos<-1
     envir <- as.environment(pos)
     assign("Results", out, envir = envir)
+    #print(a)
     print(out)
 
     #Plotting
     if(tclvalue(e$plot)>0){
-        vals<-c(varValue1, varValue2)
-        names<-as.factor(c(rep(varName1,length(varValue1)),rep(varName2,length(varValue2))))
-        boxplot(vals ~ names)
-        stripchart(vals ~ names,pch=16, vert=TRUE, add=TRUE,cex=1)
+      boxplot(yvars ~ factor, xlab=varName2, ylab=varName1)
+      stripchart(yvars ~ factor,pch=16, vert=TRUE, add=TRUE,cex=1)
     }
     tkdestroy(e$wnd)
 }
@@ -700,19 +702,21 @@ run.F_var <- function(e){
     altselect <- tclvalue(e$alternative)
     alternative <- switch(altselect , "two.sided" = altselect , "less" = altselect , "greater" = altselect )
     assign("alternative", altselect, envir = e)
-    out<-var.test(x=varValue1, y=varValue2,alternative=e$alternative, conf.level = e$conf.level)
+    yvars<-c(e$varValue1)
+    factor<-as.factor(varValue2)
+    a<-paste("var.test(", "yvars", " ~ ", "factor , ","conf.level=",e$conf.level, ",alternative=","'",e$alternative,"'",")",sep = "")
+    out<-eval(parse(text = a))
     out$data.name<-paste(varName1, "and", varName2)
     pos<-1
     envir <- as.environment(pos)
     assign("Results", out, envir = envir)
+    print(a)
     print(out)
 
     #Plotting
     if(tclvalue(e$plot)>0){
-        vals<-c(varValue1, varValue2)
-        names<-as.factor(c(rep(varName1,length(varValue1)),rep(varName2,length(varValue2))))
-        boxplot(vals ~ names)
-        stripchart(vals ~ names,pch=16, vert=TRUE, add=TRUE,cex=1)
+      boxplot(yvars ~ factor, xlab=varName2, ylab=varName1)
+      stripchart(yvars ~ factor,pch=16, vert=TRUE, add=TRUE,cex=1)
     }
     tkdestroy(e$wnd)
 }
@@ -756,8 +760,8 @@ run.LevenesVarTest<-function(e){
     centselect <- tclvalue(e$center)
     center <- switch(centselect , "mean" = centselect , "median" = centselect )
     assign("center", centselect, envir = e)
-    yvars<-c(e$varValue1, e$varValue2)
-    factor<-as.factor(c(rep(varName1,length(varValue1)),rep(varName2,length(varValue2))))
+    yvars<-c(e$varValue1)
+    factor<-as.factor(varValue2)
     a<-paste("leveneTest(", "yvars", " ~ ", "factor , ", "center=",center,")",sep = "")
     out<-eval(parse(text = a))
     pos<-1
@@ -767,8 +771,8 @@ run.LevenesVarTest<-function(e){
 
     #Plotting
     if(tclvalue(e$plot)>0){
-        boxplot(yvars ~ factor)
-        stripchart(yvars ~ factor,pch=16, vert=TRUE, add=TRUE,cex=1)
+      boxplot(yvars ~ factor, xlab=varName2, ylab=varName1)
+      stripchart(yvars ~ factor,pch=16, vert=TRUE, add=TRUE,cex=1)
     }
     tkdestroy(e$wnd)
 }
@@ -1354,7 +1358,7 @@ run.simp_lm<-function(e){
 layout.glm<-function(e){
     e$distfx<-tclVar("gaussian")
     e$linkfx<-tclVar("identity")
-    e$plot<-tclVar(FALSE)  
+    e$plot<-tclVar(FALSE)
 
     #Begin GUI Setup
     tkwm.title(e$wnd, "Generalized Linear Model Dialog")
