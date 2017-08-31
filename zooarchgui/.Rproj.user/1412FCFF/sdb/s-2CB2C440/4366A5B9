@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "source(\"E:/Dropbox (LCA)/Documents/bitbucket/zooarchgui/R/ConfigureFrame.r\")\nsource(\"E:/Dropbox (LCA)/Documents/bitbucket/zooarchgui/R/Menu.r\")\nsource(\"E:/Dropbox (LCA)/Documents/bitbucket/zooarchgui/R/zooarchGUI.r\")\n\nlibrary(tcltk2)\nlibrary(zooaRchGUI)\nname<-\"gpagen\"\ncomboNum=3\ndir=\"ver\"\ne <- new.env()\nclass(e) <- name\ncreateConfigureFrame(e, comboNum, dir)\n\n\n",
+    "created" : 1503168159658.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "677833157",
+    "id" : "4366A5B9",
+    "lastKnownWriteTime" : 1503445379,
+    "last_content_update" : 1503445379325,
+    "path" : "E:/Dropbox (LCA)/Documents/Research/zoaRch_project/zooaRchGUI_v1/admin/testfunctions.R",
+    "project_path" : null,
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

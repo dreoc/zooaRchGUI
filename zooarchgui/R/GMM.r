@@ -41,7 +41,7 @@ run.readland<-function(e) {
            data <- as.array(readmulti.nts(name))
            pos<-1
            envir <- as.environment(pos)
-           assign(x = "collective.array", value = data, envir = envir)}
+           assign(x = "landmark.data", value = data, envir = envir)}
            )
     tkdestroy(e$wnd)
 }
@@ -173,9 +173,9 @@ run.gpagen<-function(e) {
 
 digitize2D <-function() {
     e <- new.env()
-	
 
-	
+
+
     e$wnd <- tktoplevel(width=800, height=600)
     tktitle(e$wnd) <- "2D Digitizing"
 
@@ -190,7 +190,7 @@ digitize2D <-function() {
 	sliderInit(e)
 	linkInit(e)
 	digitizeInit(e)
-	
+
 	e$activeDataList <- list()
 	e$currImgId <- 1
 	e$tab <- 0

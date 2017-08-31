@@ -1,0 +1,20 @@
+{
+    "collab_server" : "",
+    "contents" : "marjR <- data.frame(\"Genus\" = rep(\"Ovis/Capra\", times = 42), \n                                        \"Ageclass\" = c(rep(1, 1), rep(2, 1), rep(3, 10), rep(4, 7), \n                                         rep(5, 6), rep(6, 6), rep(7, 6), rep(8, 3), \n                                         rep(9, 2)))\nsave(marjR,file=\"marjR.RData\")\nsave.image()\n\n\nspeth83 <- data.frame(\"Genus\" = rep(\"Bison\", times = 30), \n                          ###         make sure times = the number of specimens in your sample\n                          \"Ageclass\" = c(rep(1, 2), rep(2, 1), rep(3, 4), rep(4, 4), \n                                         rep(5, 1), rep(6, 2), rep(7, 3), rep(8, 4), \n                                         rep(9, 2), rep(10, 2), rep(11, 2), rep(12, 2), \n                                         rep(13, 1)))\nsave(speth83,file=\"speth83.RData\")\nsave.image()\n\n\n\n\nwinslow.fuse<-as.data.frame(read.csv(\"C:\\\\Users\\\\EOC\\\\Dropbox\\\\zoaRch_project\\\\v101\\\\Supp_2_Winslow_Final.csv\"))\nhead(winslow.fuse)\nsave(winslow.fuse,file=\"winslow.fuse.RData\")\nsave.image()\n\n\nbos<-as.data.frame(read.csv(\"E:\\\\Dropbox\\\\zoaRch_project\\\\Size standardization files\\\\Bos_Degerbol.csv\"))\ncapra<-as.data.frame(read.csv(\"E:\\\\Dropbox\\\\zoaRch_project\\\\Size standardization files\\\\Capra_Uerpman.csv\"))\novis_popkin<-as.data.frame(read.csv(\"E:\\\\Dropbox\\\\zoaRch_project\\\\Size standardization files\\\\Ovis_Popkin.csv\"))\novis_uerpman<-as.data.frame(read.csv(\"E:\\\\Dropbox\\\\zoaRch_project\\\\Size standardization files\\\\Ovis_Uerpman.csv\"))\nsus<-as.data.frame(read.csv(\"E:\\\\Dropbox\\\\zoaRch_project\\\\Size standardization files\\\\Sus_HongoMeadow.csv\"))\n\nstandards<-list(bos=bos,capra=capra,ovis_popkin=ovis_popkin,ovis_uerpman=ovis_uerpman,sus=sus)                \nsave(standards,file=\"standards.RData\")\nsave.image()",
+    "created" : 1503327576176.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "210797959",
+    "id" : "202C664",
+    "lastKnownWriteTime" : 1449543504,
+    "last_content_update" : 1449543504,
+    "path" : "E:/Dropbox (LCA)/Documents/Research/zoaRch_project/zooaRchGUI_v1/admin/createdatasets.R",
+    "project_path" : null,
+    "properties" : {
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
