@@ -3,7 +3,7 @@ layout.parMANOVA<-function(e){ #EOC + JBR
   e$permutations<-tclVar(99)
   e$type<-tclVar("Wilks")
   e$function_type<-tclVar("Additive")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "MANOVA")
   tkconfigure(e$layout, text = "MANOVA")
@@ -18,7 +18,7 @@ layout.parMANOVA<-function(e){ #EOC + JBR
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 6, column = 1, sticky = "w")
-  
+
   #Test Method Selection
   put_label(e$layout, "Test:", 7,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -33,9 +33,9 @@ run.parMANOVA<-function(e){
     #Using Selected Values
     Value_Y <- getVarName(e, 1)
     Value_X <- getVarName(e, 2)
-    
+
     #Error Checking
-    if(sum(sapply(e$dataFrame[,Value_Y], is.numeric))==FALSE) { 
+    if(sum(sapply(e$dataFrame[,Value_Y], is.numeric))==FALSE) {
       tkdestroy(e$wnd)
       stop("Response matrix must not contain characters!")
     }
@@ -76,12 +76,12 @@ run.parMANOVA<-function(e){
     tkdestroy(e$wnd)
 }
 
-# NPMANOVA Function 
+# NPMANOVA Function
 layout.NPMANOVA<-function(e){ #EOC + JBR
   e$permutations<-tclVar(99)
   e$type<-tclVar("Euclidean")
   e$function_type<-tclVar("Additive")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "NP-MANOVA")
   tkconfigure(e$layout, text = "NP-MANOVA")
@@ -96,7 +96,7 @@ layout.NPMANOVA<-function(e){ #EOC + JBR
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 6, column = 1, sticky = "w")
-  
+
   #Method Selection Radiobuttons
   put_label(e$layout, "Method:", 7,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -105,19 +105,19 @@ layout.NPMANOVA<-function(e){ #EOC + JBR
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 7, column = 1, sticky = "w")
-  
+
   #Permutation Slider
   put_label(e$layout, "Permutations:", 8, 0, sticky = "w")
   conf_level_frame <- ttkframe(e$layout)
-  tkgrid(conf_level_frame, row = 8, column = 1, columnspan = 2, 
+  tkgrid(conf_level_frame, row = 8, column = 1, columnspan = 2,
          sticky = "w")
-  conf_level_scale <- ttkscale(conf_level_frame, 
+  conf_level_scale <- ttkscale(conf_level_frame,
                                from = 99, to = 10000,
                                variable = e$permutations)
   #Permutation Spinbox
   tkspinbox <- function(parent, ...)
     tkwidget(parent, "tk::spinbox", ...)
-  conf_level_spin <- tkspinbox(conf_level_frame, 
+  conf_level_spin <- tkspinbox(conf_level_frame,
                                from = 99, to = 10000, increment = 1,
                                textvariable = e$permutations, width = 5)
   tkpack(conf_level_scale, side = "left")
@@ -128,7 +128,7 @@ run.NPMANOVA<-function(e){
     #Using Selected Values
     Value_Y <- getVarName(e, 1)
     Value_X <- getVarName(e, 2)
-    
+
     #Error Checking
     if(sum(sapply(e$dataFrame[,Value_Y], is.numeric))==FALSE) {
       tkdestroy(e$wnd)
@@ -176,19 +176,19 @@ run.NPMANOVA<-function(e){
     tkdestroy(e$wnd)
 }
 
-# NP Hotelling Function 
+# NP Hotelling Function
 layout.NPHotellingt<-function(e){ #EOC + JBR
-  e$dataFrame <- tclVar("NULL"); 
+  e$dataFrame <- tclVar("NULL");
   e$permutations<-tclVar(99)
   e$type<-tclVar("Euclidean")
   e$function_type<-tclVar("Additive")
- 
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "zooaRch")
   tkconfigure(e$layout, text = "NP-Hotelling T")
   tkconfigure(e$varLabel[[1]], text = "Response Matrix:")
   tkconfigure(e$varLabel[[2]], text = "Predictor Matrix:")
-  
+
   #X-Matrix Interactions Radiobuttons
   put_label(e$layout, "Regression Behavior:", 6,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -197,7 +197,7 @@ layout.NPHotellingt<-function(e){ #EOC + JBR
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 6, column = 1, sticky = "w")
-  
+
   #Method Selection Radiobuttons
   put_label(e$layout, "Method:", 7,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -206,19 +206,19 @@ layout.NPHotellingt<-function(e){ #EOC + JBR
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 7, column = 1, sticky = "w")
-  
+
   #Permutation Slider
   put_label(e$layout, "Permutations:", 8, 0, sticky = "w")
   conf_level_frame <- ttkframe(e$layout)
-  tkgrid(conf_level_frame, row = 8, column = 1, columnspan = 2, 
+  tkgrid(conf_level_frame, row = 8, column = 1, columnspan = 2,
          sticky = "w")
-  conf_level_scale <- ttkscale(conf_level_frame, 
+  conf_level_scale <- ttkscale(conf_level_frame,
                                from = 99, to = 10000,
                                variable = e$permutations)
   #Permutation Spinbox
   tkspinbox <- function(parent, ...)
     tkwidget(parent, "tk::spinbox", ...)
-  conf_level_spin <- tkspinbox(conf_level_frame, 
+  conf_level_spin <- tkspinbox(conf_level_frame,
                                from = 99, to = 10000, increment = 1,
                                textvariable = e$permutations, width = 5)
   tkpack(conf_level_scale, side = "left")
@@ -229,7 +229,7 @@ run.NPHotellingt<-function(e){
     #Using Selected Values
     Value_Y <- getVarName(e, 1)
     Value_X <- getVarName(e, 2)
-    
+
     #Error Checking
     if(sum(sapply(e$dataFrame[,Value_Y], is.numeric))==FALSE) {
       tkdestroy(e$wnd)
@@ -276,11 +276,11 @@ run.NPHotellingt<-function(e){
     assign("Results", out, envir = envir)
     tkdestroy(e$wnd)
 }
-  
+
 # Distance Function
 layout.dist<-function(e){ #EOC + JBR
   e$type<-tclVar("Euclidean")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "Distance Matrix")
   tkconfigure(e$layout, text = "Distance Matrix")
@@ -297,7 +297,7 @@ layout.dist<-function(e){ #EOC + JBR
 }
 
 run.dist<-function(e){
-    
+
     #Error Checking
     if(sum(sapply(e$dataFrame, is.numeric))==FALSE) {
       tkdestroy(e$wnd)
@@ -330,32 +330,32 @@ run.dist<-function(e){
     assign("D_Matrix_Results", out, envir = envir)
     tkdestroy(e$wnd)
 }
-  
+
 # General Hierarchical Clustering
 layout.cluster<-function(e){
   dist.fun<-function()c(unlist(lapply(c(ls(envir = .GlobalEnv),ls("package:zooaRchGUI")), function(dist) if(class(get(dist))[1] == "dist")c(unlist(dist)))),"Load User File")
-  
+
   #Data Model: enviroment called e
   e$dataName<-tclVar("Choose Data")
   e$distancename<-tclVar("Choose Data")
   e$dataFrame<-tclVar("NULL")
   e$clustertype<-tclVar("Average")
   e$distance<-tclVar("NULL")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "zooaRch")
   tkconfigure(e$layout, text = "Hierarchical Clustering")
   columnConfig(e$layout)
-  
+
   #Distance Matrix Combobox
   put_label(e$layout, "Distance matrix:",1,0,sticky="w")
-  data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                            values = dist.fun(), 
+  data_combo <- ttkcombobox(e$layout, state = "readonly",
+                            values = dist.fun(),
                             textvariable = e$distancename)
   tkgrid(data_combo, row = 1, column = 1, sticky="w", padx = 2)
-  tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$distancename, "distance"))    
+  tkbind(data_combo, "<<ComboboxSelected>>", function() updateDataFrame(e, e$distancename, "distance"))
   tkfocus(data_combo)
-  
+
   put_label(e$layout, "Linkage Type:", 2,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
   rb_frame2<-ttkframe(e$layout)
@@ -439,7 +439,7 @@ run.cluster<-function(e) {
 # prcomp Function
 layout.prcomp<-function(e){
   e$plotcheck<-tclVar("0")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "PCA Function")
   tkconfigure(e$layout, text = "PCA Function")
@@ -483,13 +483,13 @@ run.prcomp<-function(e){
 #Correspondence Analysis Function
 layout.correspondence<-function(e){
   e$plotcheck<-tclVar("0")
- 
+
   #Begin GUI setup
   tkwm.title(e$wnd, "Correspondence Analysis")
   tkconfigure(e$layout, text = "Correspondence Analysis")
   tkconfigure(e$varLabel[[1]], text = "Choose Data:")
   tkconfigure(e$varLabel[[2]], text = "Choose Label:")
-  
+
   #Plot Data
   put_label ( e$layout , "plot data:" , 7 , 0,sticky = "w")
   plot_check1 <-ttkcheckbutton (e$layout , variable = e$plotcheck)
@@ -519,8 +519,8 @@ run.correspondence<-function(e){
     rownames(varmat)<-c("Eigenvalues", "Percent Explained", "Cum Percent Explained")
     if(as.numeric(tclvalue(e$plotcheck))>0) {
       if(length(Value1)>1) {
-        plot(out$rscore[,1:2],xlim=range(c(out$cscore[,1:2],out$rscore[,1:2])), 
-             ylim=range(c(out$cscore[,1:2],out$rscore[,1:2])),type="n", 
+        plot(out$rscore[,1:2],xlim=range(c(out$cscore[,1:2],out$rscore[,1:2])),
+             ylim=range(c(out$cscore[,1:2],out$rscore[,1:2])),type="n",
              xlab="CA Axis I", ylab="CA Axis II")
         text(out$rscore[,1:2], label=rownames(out$Freq), col="blue",cex = .75)
         text(out$cscore[,1:2], label=colnames(out$Freq), col="red", pos=3, cex=1.5)
@@ -539,17 +539,17 @@ run.correspondence<-function(e){
     print(varmat) # Changed the printting function to varmat
     tkdestroy(e$wnd)
 }
-  
+
 # PCoA Function
 layout.PCoA<-function(e){
   e$type<-tclVar("Euclidean")
-  
+
 
   #Begin GUI Setup
   tkwm.title(e$wnd, "Principal Coordinates Analysis")
   tkconfigure(e$layout, text = "Correspondence Analysis")
   tkconfigure(e$varLabel[[1]], text = "Choose Data:")
-  
+
   #Distance Type Selection Radiobuttons
   put_label(e$layout, "Distance Type", 2,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -596,28 +596,28 @@ run.PCoA<-function(e){
     print(out$varmat)
     tkdestroy(e$wnd)
 }
-  
+
 # NMDS Function
 layout.NMDS<-function(e){
   e$dataname <- tclVar("Choose one")
   e$dataFrame <- tclVar("NULL")
-  e$inpults1 <- tclVar("NULL")
-  e$inpults2 <- sort(colnames(e$dataFrame))
+  e$inputs1 <- tclVar("NULL")
+  e$inputs2 <- sort(colnames(e$dataFrame))
   e$type<-tclVar("Euclidean")
   e$kval<-tclVar(3)
   e$shepard<-tclVar(FALSE)
   e$labels<-tclVar(FALSE)
   e$plot<-tclVar(TRUE)
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "zooaRch")
   tkconfigure(e$layout, text = "Non-Metric Multidimensional Scaling")
   columnConfig(e$layout)
-  
+
   #Data Combobox
   put_label(e$layout, "Data:",0,0,sticky="w")
-  data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                            values = dfs.fun(), 
+  data_combo <- ttkcombobox(e$layout, state = "readonly",
+                            values = dfs.fun(),
                             textvariable = e$dataname)
   tkgrid(data_combo, row = 0, column = 1, sticky="w", padx = 2)
   tkbind(data_combo, "<<ComboboxSelected>>", function(){
@@ -626,26 +626,26 @@ layout.NMDS<-function(e){
 		   e$inputs2 = sort(colnames(e$dataFrame))
            tkdelete(e$list1, 0, "end")
 		   tkdelete(e$list2, 0, "end")
-		   
+
            for (input in e$inputs1){
                tkinsert(e$list1, "end", input)
            }
            tkselection.set(e$list1, 0)
-		   
+
 		    for (input in e$inputs2){
                tkinsert(e$list2, "end", input)
            }
            tkselection.set(e$list2, 0)
-		   
-    })	
+
+    })
   tkfocus(data_combo)                      # give focus
-  
+
   #K Value Combobox
   put_label(e$layout, "Dimensions:",1,0,sticky="w")
   e$list1 <- smartListbox(e$layout, NULL)
   tkgrid(e$list1, row = 1, column = 1, sticky="w", padx = 2)
   tkfocus(e$list1)
-  
+
   #Distance Type Selection Radiobuttons
   put_label(e$layout, "Distance Type", 2,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -654,22 +654,22 @@ layout.NMDS<-function(e){
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 2, column = 1, sticky = "w")
-  
+
   #Data Choice Listbox
   put_label(e$layout, "Choose Data:",row=3,column=0,sticky="w")
   e$list2 <- smartListbox(e$layout, e$inpults2)
   tkgrid(e$list2, padx = 2, pady = c(5, 10),row = 3, column = 1)
-  
+
   #Plot Checkbox
   put_label ( e$layout , "NMDS plot:" , 6 , 0,sticky = "w")
   plot_check1 <-ttkcheckbutton (e$layout , variable = e$plot)
   tkgrid (plot_check1 , row = 6 , column = 1 , sticky = "w" ,padx = 2)
-  
+
   #Labels Checkbox
   put_label ( e$layout , "Labels:" , 6 , 2,sticky = "w")
   plot_check1 <-ttkcheckbutton (e$layout , variable = e$labels)
   tkgrid (plot_check1 , row = 6 , column = 3 , sticky = "w" ,padx = 2)
-  
+
   #Shepard Checkbox
   put_label ( e$layout , "Shepard plot:" , 6 , 4,sticky = "w")
   plot_check1 <-ttkcheckbutton (e$layout , variable = e$shepard)
@@ -692,22 +692,25 @@ run.NMDS<-function(e){
     switch(tclvalue(e$type),
            Canberra = {#dist_value<-(dist(e$dataFrame[,Value1],method="canberra"))
              #PCoA_val<-cmdscale(dist_value, k = (as.numeric(nrow(e$dataFrame[,Value1]))-1))
-             nmds_value<-metaMDS(e$dataFrame[,Value1], k = as.numeric(tclvalue(kval)), distance = "canberra", autotransform = F)
+             nmds_value<-metaMDS(e$dataFrame[,Value1], k = kval, distance = "canberra", autotransform = FALSE)
            },
            Euclidean = {#dist_value<-as.matrix(dist(e$dataFrame[,Value1],method="euclidean"))
              #PCoA_val<-cmdscale(dist_value, k = (as.numeric(nrow(e$dataFrame[,Value1]))-1))
-             nmds_value<-metaMDS(e$dataFrame[,Value1], k = as.numeric(tclvalue(kval)), distance = "euclidean", autotransform = F)
+             nmds_value<-metaMDS(e$dataFrame[,Value1], k = kval, distance = "euclidean", autotransform = FALSE)
            },
            Jaccard = {#dist_value<-as.matrix(dist(e$dataFrame[,Value1],method="jaccard"))
              #PCoA_val<-cmdscale(dist_value, k = (as.numeric(nrow(e$dataFrame[,Value1]))-1))
-             nmds_value<-metaMDS(e$dataFrame[,Value1], k = as.numeric(tclvalue(kval)), distance = "jaccard", autotransform = F)
+             nmds_value<-metaMDS(e$dataFrame[,Value1], k = kval, distance = "jaccard", autotransform = FALSE)
            },
            Manhattan = {#dist_value<-as.matrix(dist(e$dataFrame[,Value1],method="manhattan"))
              #PCoA_val<-cmdscale(dist_value, k = (as.numeric(nrow(e$dataFrame[,Value1]))-1))
-             nmds_value<-metaMDS(e$dataFrame[,Value1], k = as.numeric(tclvalue(kval)), distance = "manhattan", autotransform = F)}
+             nmds_value<-metaMDS(e$dataFrame[,Value1], k = kval, distance = "manhattan", autotransform = FALSE)}
     )
     new_value<-as.matrix(nmds_value$points)
     out<-nmds_value
+    pos<-1
+    envir <- as.environment(pos)
+    assign("Results", out, envir = envir)
     labels<-as.logical(as.numeric(tclvalue(e$labels)))
     drawplot<-as.logical(as.numeric(tclvalue(e$plot)))
     shep<-as.logical(as.numeric(tclvalue(e$shepard)))
@@ -723,27 +726,28 @@ run.NMDS<-function(e){
       stressplot(out)
     }
     tkdestroy(e$wnd)
+
 }
-  
+
 # 2-way Mantel Function
 layout.mantel2way<-function(e){
   e$dataName <- tclVar("Choose dataFrame")
   e$dataName2<-tclVar("Choose dataFrame")
-  e$dataFrame <- tclVar("NULL") 
+  e$dataFrame <- tclVar("NULL")
   e$dataFrame2<-tclVar("NULL")
   e$permutations<-tclVar(999)
   e$type1<-tclVar("Euclidean")
   e$type2<-tclVar("Euclidean")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "2 Matrix Mantel Test")
   tkconfigure(e$layout, text = "2 Matrix Mantel")
   columnConfig(e$layout)
-  
+
   #First Data Combobox
   put_label(e$layout, "First dataFrame:",0,0,sticky="w")
-  data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                            values = dfs.fun(), 
+  data_combo <- ttkcombobox(e$layout, state = "readonly",
+                            values = dfs.fun(),
                             textvariable = e$dataName)
   tkgrid(data_combo, row = 0, column = 1, sticky="w", padx = 2)
   tkbind(data_combo, "<<ComboboxSelected>>", function(){
@@ -759,9 +763,9 @@ layout.mantel2way<-function(e){
     tkfocus(data_combo)
 
   #Second Data Combobox
-  put_label(e$layout, "Second dataFrame:",2,0,sticky="w") 
-  data_combo2 <- ttkcombobox(e$layout, state = "readonly", 
-                             values = dfs.fun(), 
+  put_label(e$layout, "Second dataFrame:",2,0,sticky="w")
+  data_combo2 <- ttkcombobox(e$layout, state = "readonly",
+                             values = dfs.fun(),
                              textvariable = e$dataName2)
   tkgrid(data_combo2, row = 2, column = 1, sticky="w", padx = 2)
   tkbind(data_combo2, "<<ComboboxSelected>>", function(){
@@ -774,7 +778,7 @@ layout.mantel2way<-function(e){
            }
            tkselection.set(e$list2, 0)
     })
-    tkfocus(data_combo2)                      
+    tkfocus(data_combo2)
 
     #First dataFrame Listbox
     put_label(e$layout, "First Matrix:",row=4,column=0,sticky="n")
@@ -795,7 +799,7 @@ layout.mantel2way<-function(e){
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 7, column = 1, sticky = "w")
-  
+
   #Second Matrix Radiobuttons
   put_label(e$layout, "Second Matrix Method:", 8,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -804,20 +808,20 @@ layout.mantel2way<-function(e){
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 8, column = 1, sticky = "w")
-  
+
   #Permutation Slider
   put_label(e$layout, "Permutations:", 9, 0, sticky = "w")
   conf_level_frame <- ttkframe(e$layout)
-  tkgrid(conf_level_frame, row = 9, column = 1, columnspan = 2, 
+  tkgrid(conf_level_frame, row = 9, column = 1, columnspan = 2,
          sticky = "w")
-  conf_level_scale <- ttkscale(conf_level_frame, 
-                               from = 99, to = 10000,  
+  conf_level_scale <- ttkscale(conf_level_frame,
+                               from = 99, to = 10000,
                                variable = e$permutations)
   #Permutation Spinbox
   tkspinbox <- function(parent, ...)
     tkwidget(parent, "tk::spinbox", ...)
-  conf_level_spin <- tkspinbox(conf_level_frame, 
-                               from = 99, to = 10000, increment = 1, 
+  conf_level_spin <- tkspinbox(conf_level_frame,
+                               from = 99, to = 10000, increment = 1,
                                textvariable = e$permutations, width = 5)
   tkpack(conf_level_scale, side = "left")
   tkpack(conf_level_spin, side = "left")
@@ -827,9 +831,9 @@ run.mantel2way<-function(e){
     #Using Selected Values
     Value_First <- e$inputs1[as.numeric(tkcurselection(e$list1)) + 1]
     Value_Second <- e$inputs2[as.numeric(tkcurselection(e$list2)) + 1]
-    
+
     #Error Checking
-    if(sum(sapply(e$dataFrame[,Value_First], is.numeric))==FALSE) { 
+    if(sum(sapply(e$dataFrame[,Value_First], is.numeric))==FALSE) {
       print("First matrix must not contain characters!")
       tkdestroy(e$wnd)
       run.mantel2way(e)
@@ -841,7 +845,7 @@ run.mantel2way<-function(e){
       run.mantel2way(e)
       stop(call. = FALSE)
     }
-    if(sum(sapply(e$dataFrame2[,Value_Second], is.numeric))==FALSE) { 
+    if(sum(sapply(e$dataFrame2[,Value_Second], is.numeric))==FALSE) {
       print("Second matrix must not contain characters!")
       tkdestroy(e$wnd)
       run.mantel2way(e)
@@ -882,29 +886,29 @@ run.mantel2way<-function(e){
     assign("Results", out, envir = envir)
     tkdestroy(e$wnd)
 }
-  
+
 # 3 Way Mantel Function
 layout.mantel3<-function(e){
   e$dataName <- tclVar("Choose dataFrame")
   e$dataName2<-tclVar("Choose dataFrame")
   e$dataName3<-tclVar("Choose dataFrame")
-  e$dataFrame <- tclVar("NULL") 
+  e$dataFrame <- tclVar("NULL")
   e$dataFrame2<-tclVar("NULL")
   e$dataFrame3<-tclVar("NULL")
   e$permutations<-tclVar(999)
   e$type1<-tclVar("Euclidean")
   e$type2<-tclVar("Euclidean")
   e$type3<-tclVar("Euclidean")
-  
+
   #Begin GUI Setup
   tkwm.title(e$wnd, "3 Matrix Mantel Test")
   tkconfigure(e$layout, text = "3 Matrix Mantel")
   columnConfig(e$layout)
-  
+
   #First Data Combobox
   put_label(e$layout, "First dataFrame:",0,0,sticky="w")
-  data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                            values = dfs.fun(), 
+  data_combo <- ttkcombobox(e$layout, state = "readonly",
+                            values = dfs.fun(),
                             textvariable = e$dataName)
   tkgrid(data_combo, row = 0, column = 1, sticky="w", padx = 2)
   tkbind(data_combo, "<<ComboboxSelected>>", function(){
@@ -920,9 +924,9 @@ layout.mantel3<-function(e){
     tkfocus(data_combo)
 
   #Second Data Combobox
-  put_label(e$layout, "Second dataFrame:",2,0,sticky="w") 
-  data_combo2 <- ttkcombobox(e$layout, state = "readonly", 
-                             values = dfs.fun(), 
+  put_label(e$layout, "Second dataFrame:",2,0,sticky="w")
+  data_combo2 <- ttkcombobox(e$layout, state = "readonly",
+                             values = dfs.fun(),
                              textvariable = e$dataName2)
   tkgrid(data_combo2, row = 2, column = 1, sticky="w", padx = 2)
   tkbind(data_combo2, "<<ComboboxSelected>>", function(){
@@ -935,12 +939,12 @@ layout.mantel3<-function(e){
            }
            tkselection.set(e$list2, 0)
     })
-    tkfocus(data_combo2)                      
+    tkfocus(data_combo2)
 
   #Third Data Combobox
-  put_label(e$layout, "Third dataFrame:",3,0,sticky="w") 
-  data_combo3 <- ttkcombobox(e$layout, state = "readonly", 
-                             values = dfs.fun(), 
+  put_label(e$layout, "Third dataFrame:",3,0,sticky="w")
+  data_combo3 <- ttkcombobox(e$layout, state = "readonly",
+                             values = dfs.fun(),
                              textvariable = e$dataName3)
   tkgrid(data_combo3, row = 3, column = 1, sticky="w", padx = 2)
   tkbind(data_combo3, "<<ComboboxSelected>>", function(){
@@ -953,7 +957,7 @@ layout.mantel3<-function(e){
            }
            tkselection.set(e$list3, 0)
     })
-    tkfocus(data_combo3)                      
+    tkfocus(data_combo3)
 
   #First dataFrame Listbox
     put_label(e$layout, "First Matrix:",row=4,column=0,sticky="n")
@@ -979,7 +983,7 @@ layout.mantel3<-function(e){
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 7, column = 1, sticky = "w")
-  
+
   #Matrix 2 Radiobuttons
   put_label(e$layout, "Second Matrix Method:", 8,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -988,7 +992,7 @@ layout.mantel3<-function(e){
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 8, column = 1, sticky = "w")
-  
+
   #Matrix 3 Radiobuttons
   put_label(e$layout, "Third Matrix Method:", 9,0, sticky="w")
   rb_frame<-ttkframe(e$layout)
@@ -997,20 +1001,20 @@ layout.mantel3<-function(e){
     tkpack(radio_button, side = "left")
   })
   tkgrid(rb_frame, row = 9, column = 1, sticky = "w")
-  
+
   #Permutation Slider
   put_label(e$layout, "Permutations:", 10, 0, sticky = "w")
   conf_level_frame <- ttkframe(e$layout)
-  tkgrid(conf_level_frame, row = 10, column = 1, columnspan = 2, 
+  tkgrid(conf_level_frame, row = 10, column = 1, columnspan = 2,
          sticky = "w")
-  conf_level_scale <- ttkscale(conf_level_frame, 
-                               from = 99, to = 10000,  
+  conf_level_scale <- ttkscale(conf_level_frame,
+                               from = 99, to = 10000,
                                variable = e$permutations)
   #Permutation Spinbox
   tkspinbox <- function(parent, ...)
     tkwidget(parent, "tk::spinbox", ...)
-  conf_level_spin <- tkspinbox(conf_level_frame, 
-                               from = 99, to = 10000, increment = 1, 
+  conf_level_spin <- tkspinbox(conf_level_frame,
+                               from = 99, to = 10000, increment = 1,
                                textvariable = e$permutations, width = 5)
   tkpack(conf_level_scale, side = "left")
   tkpack(conf_level_spin, side = "left")
@@ -1021,9 +1025,9 @@ run.mantel3<-function(e){
     Value_First <- e$inputs1[as.numeric(tkcurselection(e$list1)) + 1]
     Value_Second <- e$inputs2[as.numeric(tkcurselection(e$list2)) + 1]
     Value_Third <- e$inputs3[as.numeric(tkcurselection(e$list3)) + 1]
-    
+
     #Error Checking
-    if(sum(sapply(e$dataFrame[,Value_First], is.numeric))==FALSE) { 
+    if(sum(sapply(e$dataFrame[,Value_First], is.numeric))==FALSE) {
       print("First matrix must not contain characters!")
       tkdestroy(e$wnd)
       run.mantel3(e)
@@ -1035,7 +1039,7 @@ run.mantel3<-function(e){
       run.mantel3(e)
       stop(call. = FALSE)
     }
-    if(sum(sapply(e$dataFrame2[,Value_Second], is.numeric))==FALSE) { 
+    if(sum(sapply(e$dataFrame2[,Value_Second], is.numeric))==FALSE) {
       print("Second matrix must not contain characters!")
       tkdestroy(e$wnd)
       run.mantel3(e)
@@ -1091,34 +1095,34 @@ run.mantel3<-function(e){
     dist1[is.na(dist1)]<-0
     dist2[is.na(dist2)]<-0
     dist3[is.na(dist3)]<-0
-    out<-mantel.partial(xdis = dist1,ydis = dist2,zdis = dist3, permutations=as.numeric(tclvalue(e$permutations)), na.rm = TRUE)  
+    out<-mantel.partial(xdis = dist1,ydis = dist2,zdis = dist3, permutations=as.numeric(tclvalue(e$permutations)), na.rm = TRUE)
     print(out)
     pos<-1
     envir <- as.environment(pos)
     assign("Results", out, envir = envir)
     tkdestroy(e$wnd)
 }
-  
+
 # Multivariate Vector-fitting Function
 layout.multivarfit<-function(e){
   matrix.fun<-function()c(unlist(lapply(c(ls(envir = .GlobalEnv),ls("package:zooaRchGUI")), function(matrix) if(class(get(matrix))[1] == "matrix")c(unlist(matrix)))), "Load User File")
-  
+
   e$dataName<-tclVar("Choose Ordination")
   e$dataName2<-tclVar("Choose Variabales")
   e$dataFrame<-tclVar("NULL")
   e$dataFrame2<-tclVar("NULL")
   e$permutations<-tclVar(999)
   e$choice<-tclVar(2)
-  
+
   #Begin GUI setup
   tkwm.title(e$wnd, "zooaRch")
   tkconfigure(e$layout, text = "Multivariate Association Using Vector Fitting")
   columnConfig(e$layout)
-  
+
   #First Data Combobox
   put_label(e$layout, "Ordination:",0,0,sticky="w")
-  data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                            values = c(matrix.fun()[-length(matrix.fun())],dfs.fun()), 
+  data_combo <- ttkcombobox(e$layout, state = "readonly",
+                            values = c(matrix.fun()[-length(matrix.fun())],dfs.fun()),
                             textvariable = e$dataName)
   tkgrid(data_combo, row = 0, column = 1, sticky="w", padx = 2, pady = 2)
   tkbind(data_combo, "<<ComboboxSelected>>", function(){
@@ -1134,13 +1138,13 @@ layout.multivarfit<-function(e){
   tkfocus(data_combo)
 
   #Second Data Combobox
-  put_label(e$layout, "Variables:",2,0,sticky="w") 
-  data_combo2 <- ttkcombobox(e$layout, state = "readonly", 
-                             values = c(matrix.fun()[-length(matrix.fun())],dfs.fun()), 
+  put_label(e$layout, "Variables:",2,0,sticky="w")
+  data_combo2 <- ttkcombobox(e$layout, state = "readonly",
+                             values = c(matrix.fun()[-length(matrix.fun())],dfs.fun()),
                              textvariable = e$dataName2)
   tkgrid(data_combo2, row = 2, column = 1, sticky="w", padx = 2, pady = 2)
-  tkbind(data_combo2, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName2))    
-  tkfocus(data_combo2)                      
+  tkbind(data_combo2, "<<ComboboxSelected>>", function() updateDataFrame(e, e$dataName2))
+  tkfocus(data_combo2)
 
   #Choice Combobox
   put_label(e$layout, "N Axes:", 4, 0, sticky = "w")
@@ -1148,20 +1152,20 @@ layout.multivarfit<-function(e){
   #choice_combo<-ttkcombobox(e$layout, state = "readonly", values = (2:ncol(e$dataFrame)), textvariable = e$choice)
   tkgrid(e$list1, row = 4, column = 1, sticky = "w", padx = 2, pady = 2)
   tkfocus(e$list1)
-  
+
   #Permutation Slider
   put_label(e$layout, "Permutations:", 7, 0, sticky = "w")
   conf_level_frame <- ttkframe(e$layout)
-  tkgrid(conf_level_frame, row = 7, column = 1, columnspan = 2, 
+  tkgrid(conf_level_frame, row = 7, column = 1, columnspan = 2,
          sticky = "w")
-  conf_level_scale <- ttkscale(conf_level_frame, 
-                               from = 99, to = 10000,  
+  conf_level_scale <- ttkscale(conf_level_frame,
+                               from = 99, to = 10000,
                                variable = e$permutations)
   #Permutation Spinbox
   tkspinbox <- function(parent, ...)
     tkwidget(parent, "tk::spinbox", ...)
-  conf_level_spin <- tkspinbox(conf_level_frame, 
-                               from = 99, to = 10000, increment = 1, 
+  conf_level_spin <- tkspinbox(conf_level_frame,
+                               from = 99, to = 10000, increment = 1,
                                textvariable = e$permutations, width = 5)
   tkpack(conf_level_scale, side = "left")
   tkpack(conf_level_spin, side = "left")
@@ -1173,10 +1177,10 @@ run.multivarfit<-function(e){
       tkdestroy(e$wnd)
       run.multivarfit()
     }
-    fit_value <- envfit(ord = e$dataFrame,  env=e$dataFrame2, choices= c(1:as.numeric(e$inputs[as.numeric(tkcurselection(e$list1)) + 1])), permutations=as.numeric(tclvalue(e$permutations)),na.rm = TRUE) 
+    fit_value <- envfit(ord = e$dataFrame,  env=e$dataFrame2, choices= c(1:as.numeric(e$inputs[as.numeric(tkcurselection(e$list1)) + 1])), permutations=as.numeric(tclvalue(e$permutations)),na.rm = TRUE)
     #    out<-fit_value
-    
-    #Plotting 
+
+    #Plotting
     plot(e$dataFrame[,1], e$dataFrame[,2], type="n",xlab="PCoA I",ylab="PCoA II")
     text(e$dataFrame[,1], e$dataFrame[,2], label=row.names(e$dataFrame), cex=.55,col="gray")
     plot(fit_value,col="red",lwd=3,cex=1.3)
@@ -1187,7 +1191,7 @@ run.multivarfit<-function(e){
     print(out)
     tkdestroy(e$wnd)
 }
-  
+
 # k-means Single
 layout.kmeans_single<-function(e){
     matrix.fun<-function()c(unlist(lapply(c(ls(envir = .GlobalEnv),ls("package:zooaRchGUI")), function(matrix) if(class(get(matrix))[1] == "matrix")c(unlist(matrix)))),"Load User File")
@@ -1204,8 +1208,8 @@ layout.kmeans_single<-function(e){
 
     #Data Combobox
     put_label(e$layout, "Input Data:",1,0,sticky="w")
-    data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                              values = c(matrix.fun(),df.fun()), 
+    data_combo <- ttkcombobox(e$layout, state = "readonly",
+                              values = c(matrix.fun(),df.fun()),
                               textvariable = e$dataName)
     tkgrid(data_combo, row = 1, column = 1, sticky="w", padx = 2)
     tkbind(data_combo, "<<ComboboxSelected>>", function(){
@@ -1229,12 +1233,12 @@ layout.kmeans_single<-function(e){
     put_label(e$layout, "Number of Clusters:", 3, 0, sticky = "w")
     conf_level_frame <- ttkframe(e$layout)
     conf_level_frame <- ttkframe(e$layout)
-    tkgrid(conf_level_frame, row = 3, column = 1, columnspan = 2, 
+    tkgrid(conf_level_frame, row = 3, column = 1, columnspan = 2,
            sticky = "w")
     tkspinbox <- function(parent, ...)
         tkwidget(parent, "tk::spinbox", ...)
-    conf_level_spin <- tkspinbox(conf_level_frame, 
-                                 from = 2, to = 20, increment = 1, 
+    conf_level_spin <- tkspinbox(conf_level_frame,
+                                 from = 2, to = 20, increment = 1,
                                  textvariable = e$clusternum, width = 5)
     tkpack(conf_level_spin, side = "left")
 
@@ -1250,7 +1254,7 @@ run.kmeans_single<-function(e) {
     Value_First <- e$inputs[as.numeric(tkcurselection(e$list1)) + 1]
     e$datamatrix<-e$datamatrix[,Value_First]
     #Error Checking
-    if(sum(sapply(e$datamatrix[,Value_First], is.numeric))==FALSE) { 
+    if(sum(sapply(e$datamatrix[,Value_First], is.numeric))==FALSE) {
         print("First matrix must not contain characters!")
         tkdestroy(e$wnd)
         run.kmeans_single(e)
@@ -1274,7 +1278,7 @@ run.kmeans_single<-function(e) {
     kclusters$PCA<-pc
     pos<-1
     envir <- as.environment(pos)
-    assign("SingleKmeans", kclusters, envir = envir) 
+    assign("SingleKmeans", kclusters, envir = envir)
     tkdestroy(e$wnd)
 }
 
@@ -1299,8 +1303,8 @@ layout.kmeans_multi<-function(e){
 
     #Data Combobox
     put_label(e$layout, "Input Data:",1,0,sticky="w")
-    data_combo <- ttkcombobox(e$layout, state = "readonly", 
-                              values = c(matrix.fun(),df.fun()), 
+    data_combo <- ttkcombobox(e$layout, state = "readonly",
+                              values = c(matrix.fun(),df.fun()),
                               textvariable = e$dataName)
     tkgrid(data_combo, row = 1, column = 1, sticky="w", padx = 2)
     tkbind(data_combo, "<<ComboboxSelected>>", function(){
@@ -1324,12 +1328,12 @@ layout.kmeans_multi<-function(e){
     put_label(e$layout, "Min Clusters:", 6, 0, sticky = "w")
     conf_level_frame <- ttkframe(e$layout)
     conf_level_frame <- ttkframe(e$layout)
-    tkgrid(conf_level_frame, row = 6, column = 1, columnspan = 2, 
+    tkgrid(conf_level_frame, row = 6, column = 1, columnspan = 2,
            sticky = "w")
     tkspinbox <- function(parent, ...)
         tkwidget(parent, "tk::spinbox", ...)
-    conf_level_spin <- tkspinbox(conf_level_frame, 
-                                 from = 1, to = 20, increment = 1, 
+    conf_level_spin <- tkspinbox(conf_level_frame,
+                                 from = 1, to = 20, increment = 1,
                                  textvariable = e$clustermin, width = 5)
     tkpack(conf_level_spin, side = "left")
 
@@ -1337,12 +1341,12 @@ layout.kmeans_multi<-function(e){
     put_label(e$layout, "Max Clusters:", 7, 0, sticky = "w")
     conf_level_frame <- ttkframe(e$layout)
     conf_level_frame <- ttkframe(e$layout)
-    tkgrid(conf_level_frame, row = 7, column = 1, columnspan = 2, 
+    tkgrid(conf_level_frame, row = 7, column = 1, columnspan = 2,
            sticky = "w")
     tkspinbox <- function(parent, ...)
         tkwidget(parent, "tk::spinbox", ...)
-    conf_level_spin <- tkspinbox(conf_level_frame, 
-                                 from = 1, to = 50, increment = 1, 
+    conf_level_spin <- tkspinbox(conf_level_frame,
+                                 from = 1, to = 50, increment = 1,
                                  textvariable = e$clustermax, width = 5)
     tkpack(conf_level_spin, side = "left")
 
@@ -1350,12 +1354,12 @@ layout.kmeans_multi<-function(e){
     put_label(e$layout, "Max Iterations:", 8, 0, sticky = "w")
     conf_level_frame <- ttkframe(e$layout)
     conf_level_frame <- ttkframe(e$layout)
-    tkgrid(conf_level_frame, row = 8, column = 1, columnspan = 2, 
+    tkgrid(conf_level_frame, row = 8, column = 1, columnspan = 2,
            sticky = "w")
     tkspinbox <- function(parent, ...)
         tkwidget(parent, "tk::spinbox", ...)
-    conf_level_spin <- tkspinbox(conf_level_frame, 
-                                 from = 1, to = 2000, increment = 1, 
+    conf_level_spin <- tkspinbox(conf_level_frame,
+                                 from = 1, to = 2000, increment = 1,
                                  textvariable = e$iterations, width = 5)
     tkpack(conf_level_spin, side = "left")
 
@@ -1363,12 +1367,12 @@ layout.kmeans_multi<-function(e){
     put_label(e$layout, "nstart:", 9, 0, sticky = "w")
     conf_level_frame <- ttkframe(e$layout)
     conf_level_frame <- ttkframe(e$layout)
-    tkgrid(conf_level_frame, row = 9, column = 1, columnspan = 2, 
+    tkgrid(conf_level_frame, row = 9, column = 1, columnspan = 2,
            sticky = "w")
     tkspinbox <- function(parent, ...)
         tkwidget(parent, "tk::spinbox", ...)
-    conf_level_spin <- tkspinbox(conf_level_frame, 
-                                 from = 1, to = 200, increment = 1, 
+    conf_level_spin <- tkspinbox(conf_level_frame,
+                                 from = 1, to = 200, increment = 1,
                                  textvariable = e$nstart, width = 5)
     tkpack(conf_level_spin, side = "left")
 
@@ -1389,7 +1393,7 @@ run.kmeans_multi<-function(e) {
     Value_First <- e$inputs[as.numeric(tkcurselection(e$list1)) + 1]
     e$datamatrix<-e$datamatrix[,Value_First]
     #Error Checking
-    if(sum(sapply(e$datamatrix, is.numeric))==FALSE) { 
+    if(sum(sapply(e$datamatrix, is.numeric))==FALSE) {
         print("First matrix must not contain characters!")
         tkdestroy(e$wnd)
         run.kmeans_single(e)
@@ -1406,7 +1410,7 @@ run.kmeans_multi<-function(e) {
     tess.all<-NULL
     for (i in as.numeric(tclvalue(e$clustermin)):as.numeric(tclvalue(e$clustermax)))    	{
         tess.temp<-NULL
-        km<-kmeans(pc,i,iter.max = as.numeric(tclvalue(e$iterations)), 
+        km<-kmeans(pc,i,iter.max = as.numeric(tclvalue(e$iterations)),
                    nstart= as.numeric(tclvalue(e$nstart)))
         tess.temp<-sum(km$withinss)
         tess.all<-c(tess.all,tess.temp)
@@ -1418,7 +1422,7 @@ run.kmeans_multi<-function(e) {
     colnames(out)<-c("Nclusters","WithinSS")
     pos<-1
     envir <- as.environment(pos)
-    assign("MultiKmeans", out, envir = envir) 
+    assign("MultiKmeans", out, envir = envir)
 
     ## Scree plot
     if(tclvalue(e$plot) == "1"){
